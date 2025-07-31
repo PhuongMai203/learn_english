@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import '../screens/AuthScreen.dart';
-import '../screens/pages/account_screen.dart';
-import '../screens/pages/course_screen.dart';
-import '../screens/pages/home_screen.dart';
-import '../screens/pages/intro_screen.dart';
-import '../screens/pages/practice_screen.dart';
-import '../screens/pages/support_screen.dart';
+import '../screens/user_pages/account_screen.dart';
+import '../screens/user_pages/course_screen.dart';
+import '../screens/user_pages/home_screen.dart';
+import '../screens/user_pages/intro_screen.dart';
+import '../screens/user_pages/practice_screen.dart';
+import '../screens/user_pages/support_screen.dart';
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});

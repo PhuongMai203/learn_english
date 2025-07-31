@@ -20,6 +20,9 @@ dependencies:
   firebase_messaging: ^16.0.0
   top_snackbar_flutter: ^3.3.0
   percent_indicator: ^4.2.5
+  lucide_icons_flutter: ^3.0.7
+  iconsax_flutter: ^1.0.1
+  font_awesome_flutter: ^10.8.0
 
 dev_dependencies:
   flutter_test:

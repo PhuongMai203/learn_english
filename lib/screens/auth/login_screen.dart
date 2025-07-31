@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../components/app_text_styles.dart';
-import '../pages/home_screen.dart';
+import '../user_pages/home_screen.dart';
 
 class LoginTab extends StatefulWidget {
   final GlobalKey<FormState> formKey;

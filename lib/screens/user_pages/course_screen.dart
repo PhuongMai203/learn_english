@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/percent_indicator.dart'; // Thêm thư viện này vào pubspec.yaml
 
 class CourseScreen extends StatelessWidget {
   const CourseScreen({super.key});

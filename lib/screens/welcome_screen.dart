@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:learn_english/screens/pages/home_screen.dart';
+import 'package:learn_english/screens/user_pages/home_screen.dart';
 import '../components/app_background.dart';
 import 'AuthScreen.dart';
 
