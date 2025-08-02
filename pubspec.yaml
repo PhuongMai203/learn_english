@@ -23,6 +23,8 @@ dependencies:
   lucide_icons_flutter: ^3.0.7
   iconsax_flutter: ^1.0.1
   font_awesome_flutter: ^10.8.0
+  shared_preferences: ^2.5.3
+  google_sign_in: ^6.3.0
 
 dev_dependencies:
   flutter_test:

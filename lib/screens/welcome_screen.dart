@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:learn_english/screens/user_pages/home_screen.dart';
 import '../components/app_background.dart';
+import '../components/main_navigation.dart';
 import 'AuthScreen.dart';
 
 class WelcomeScreen extends StatelessWidget {
@@ -44,7 +44,7 @@ class WelcomeScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                          MaterialPageRoute(builder: (context) => const MainNavigation()),
                         );
                       },
                       style: TextButton.styleFrom(

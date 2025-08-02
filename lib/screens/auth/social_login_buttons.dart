@@ -1,7 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../../components/main_navigation.dart';
 
 class SocialLoginButtons extends StatelessWidget {
-  const SocialLoginButtons({super.key});
+  SocialLoginButtons({super.key});
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    scopes: ['email'],
+  );
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> _handleGoogleSignIn(BuildContext context) async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+
+      if (googleUser == null) {
+        _showMsg(context, 'Đăng nhập đã bị hủy.');
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      final User? user = userCredential.user;
+
+      if (user != null) {
+        // Lưu vào Firestore nếu chưa tồn tại
+        final docRef = _firestore.collection('users').doc(user.uid);
+        final snapshot = await docRef.get();
+
+        if (!snapshot.exists) {
+          await docRef.set({
+            'uid': user.uid,
+            'email': user.email,
+            'username': user.displayName ?? 'Không tên',
+            'photoURL': user.photoURL ?? '',
+            'phone': user.phoneNumber ?? '',
+            'role': 'user',
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainNavigation()),
+        );
+
+      }
+    } catch (error) {
+      _showMsg(context, 'Đã xảy ra lỗi: $error');
+      print('Lỗi đăng nhập Google: $error');
+    }
+  }
+
+  void _showMsg(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +93,7 @@ class SocialLoginButtons extends StatelessWidget {
               context,
               icon: 'assets/google_logo.png',
               label: 'Google',
-              onPressed: () => _showMsg(context, 'Đang đăng nhập bằng Google'),
+              onPressed: () => _handleGoogleSignIn(context),
             ),
             const SizedBox(width: 20),
             _buildSocialButton(
@@ -61,12 +127,6 @@ class SocialLoginButtons extends StatelessWidget {
           Text(label),
         ],
       ),
-    );
-  }
-
-  void _showMsg(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
     );
   }
 }

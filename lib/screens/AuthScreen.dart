@@ -8,6 +8,8 @@ import 'auth/auth_tab_selector.dart';
 import 'auth/login_screen.dart';
 import 'auth/register_screen.dart';
 import 'auth/social_login_buttons.dart';
+import 'auth_gate.dart';
+import 'welcome_screen.dart';
 
 
 class AuthScreen extends StatefulWidget {
@@ -113,7 +115,12 @@ class _AuthScreenState extends State<AuthScreen>
                     alignment: Alignment.centerLeft,
                     child: IconButton(
                       icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Color(0xFF5A6A9A)),
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+                        );
+                      },
                     ),
                   ),
                   Image.asset('assets/logo.png', width: 80, height: 80),
@@ -135,19 +142,16 @@ class _AuthScreenState extends State<AuthScreen>
                           onSubmit: (email, password) async {
                             try {
                               final userCredential = await FirebaseAuth.instance
-                                  .signInWithEmailAndPassword(
-                                  email: email, password: password);
+                                  .signInWithEmailAndPassword(email: email, password: password);
+
                               if (userCredential.user != null) {
                                 _showSuccessSnackbar('Đăng nhập thành công!');
+
                                 Navigator.pushReplacement(
                                   context,
-                                  PageRouteBuilder(
-                                    pageBuilder: (_, __, ___) => const HomeScreen(),
-                                    transitionsBuilder: (_, animation, __, child) {
-                                      return FadeTransition(opacity: animation, child: child);
-                                    },
-                                  ),
+                                  MaterialPageRoute(builder: (_) => const AuthGate()),
                                 );
+
                               }
                             } catch (e) {
                               showTopSnackBar(
@@ -156,6 +160,7 @@ class _AuthScreenState extends State<AuthScreen>
                               );
                             }
                           },
+
                           onForgotPassword: _resetPassword,
                         ),
                         RegisterScreen(
@@ -169,12 +174,8 @@ class _AuthScreenState extends State<AuthScreen>
                       ],
                     ),
                   ),
-                  const SizedBox(height: 10),
 
-                  /// 👉 Social login buttons
-                  const SocialLoginButtons(),
-
-                  const SizedBox(height: 10),
+                  SocialLoginButtons(),
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

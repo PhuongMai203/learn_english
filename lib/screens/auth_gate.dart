@@ -1,92 +1,93 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/main_navigation.dart';
 import 'admin_pages/admin_navbar.dart';
 import 'welcome_screen.dart';
 
-class AuthGate extends StatelessWidget {
+class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
 
-  Future<String?> _getUserRole(String uid) async {
-    try {
-      final snapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .get();
+  @override
+  State<AuthGate> createState() => _AuthGateState();
+}
 
-      if (snapshot.exists) {
-        final role = snapshot.data()?['role'];
-        debugPrint('Dữ liệu role lấy được: $role');
-        return role;
-      } else {
-        debugPrint('Không tìm thấy document người dùng với UID: $uid');
+class _AuthGateState extends State<AuthGate> {
+  String? role;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkAutoLogin();
+  }
+
+  Future<void> _checkAutoLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final rememberMe = prefs.getBool('remember_me') ?? false;
+    final savedEmail = prefs.getString('saved_email') ?? '';
+    final savedPassword = prefs.getString('saved_password') ?? '';
+
+    // Tự động đăng nhập nếu có thông tin lưu trữ
+    if (rememberMe && savedEmail.isNotEmpty && savedPassword.isNotEmpty) {
+      try {
+        await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: savedEmail,
+          password: savedPassword,
+        );
+        await _getUserRole();
+      } catch (e) {
+        setState(() => isLoading = false);
       }
-    } catch (e) {
-      debugPrint('Lỗi khi lấy role từ Firestore: $e');
+    } else {
+      await _getUserRole();
     }
-    return null;
+  }
+
+  Future<void> _getUserRole() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (doc.exists && doc.data()!.containsKey('role')) {
+          setState(() {
+            role = doc['role'];
+            isLoading = false;
+          });
+          return;
+        }
+    }
+    setState(() => isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
+    // Hiển thị màn hình chờ trong quá trình xử lý
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return StreamBuilder<User?>(
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
-        // Đang kết nối Firebase
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        // Có lỗi
-        if (snapshot.hasError) {
-          return const Scaffold(
-            body: Center(child: Text('Đã xảy ra lỗi. Vui lòng thử lại sau.')),
-          );
-        }
-
-        // Đã đăng nhập
+        // Kiểm tra nếu có dữ liệu đăng nhập
         if (snapshot.hasData) {
-          final user = snapshot.data!;
-          debugPrint('Đăng nhập với UID: ${user.uid}');
-
-          return FutureBuilder<String?>(
-            future: _getUserRole(user.uid),
-            builder: (context, roleSnapshot) {
-              if (roleSnapshot.connectionState == ConnectionState.waiting) {
-                return const Scaffold(
-                  body: Center(child: CircularProgressIndicator()),
-                );
-              }
-
-              if (roleSnapshot.hasError) {
-                return const Scaffold(
-                  body: Center(child: Text('Không thể xác định vai trò.')),
-                );
-              }
-
-              final role = roleSnapshot.data;
-              debugPrint('Vai trò người dùng: $role');
-
-              if (role == 'admin') {
-                debugPrint('→ Điều hướng tới giao diện ADMIN');
-                return const AdminNavbar();
-              } else if (role == 'user') {
-                debugPrint('→ Điều hướng tới giao diện USER');
-                return const MainNavigation();
-              } else {
-                return const Scaffold(
-                  body: Center(child: Text('Vai trò người dùng không hợp lệ.')),
-                );
-              }
-            },
-          );
+          // Xử lý điều hướng theo vai trò
+          if (role == 'admin') {
+            return const AdminNavbar();
+          } else if (role != null) {
+            return const MainNavigation();
+          }
         }
 
-        // Chưa đăng nhập
+        // Trường hợp không có dữ liệu đăng nhập hoặc lỗi
         return const WelcomeScreen();
       },
     );

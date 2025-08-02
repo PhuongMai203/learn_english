@@ -1,8 +1,26 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 import '../../components/app_background.dart';
+import '../welcome_screen.dart';
 
 class SystemSettingsScreen extends StatelessWidget {
   const SystemSettingsScreen({super.key});
+
+  void _signOut(BuildContext context) async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+            (route) => false,
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi đăng xuất: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +86,14 @@ class SystemSettingsScreen extends StatelessWidget {
                 title: 'Cập nhật hệ thống',
                 subtitle: 'Kiểm tra và cập nhật phiên bản mới',
                 onTap: () {},
+              ),
+              const SizedBox(height: 24),
+              _buildSectionTitle('Tài khoản'),
+              _buildSettingTile(
+                icon: Icons.logout,
+                title: 'Đăng xuất',
+                subtitle: 'Thoát khỏi tài khoản hiện tại',
+                onTap: () => _signOut(context),
               ),
             ],
           ),

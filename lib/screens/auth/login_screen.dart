@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../components/app_text_styles.dart';
 import '../user_pages/home_screen.dart';
@@ -24,6 +25,40 @@ class _LoginTabState extends State<LoginTab> {
   String _email = '';
   String _password = '';
   bool _obscurePassword = true;
+  bool _rememberMe = true; // Mặc định là true
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRememberedCredentials();
+  }
+
+  Future<void> _loadRememberedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedEmail = prefs.getString('saved_email') ?? '';
+    final savedPassword = prefs.getString('saved_password') ?? '';
+    // Sửa thành true cho trường hợp chưa có giá trị
+    final rememberMe = prefs.getBool('remember_me') ?? true;
+
+    setState(() {
+      _email = savedEmail;
+      _password = savedPassword;
+      _rememberMe = rememberMe;
+    });
+  }
+
+  Future<void> _saveCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (_rememberMe) {
+      await prefs.setString('saved_email', _email);
+      await prefs.setString('saved_password', _password);
+    } else {
+      await prefs.remove('saved_email');
+      await prefs.remove('saved_password');
+    }
+    await prefs.setBool('remember_me', _rememberMe);
+  }
+
   InputDecoration buildInputDecoration({
     required String label,
     required IconData icon,
@@ -43,6 +78,7 @@ class _LoginTabState extends State<LoginTab> {
       contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Form(
@@ -51,6 +87,7 @@ class _LoginTabState extends State<LoginTab> {
         children: [
           const SizedBox(height: 16),
           TextFormField(
+            initialValue: _email,
             style: AppTextStyles.inputText,
             decoration: buildInputDecoration(
               label: 'Email',
@@ -77,10 +114,13 @@ class _LoginTabState extends State<LoginTab> {
           const SizedBox(height: 16),
 
           TextFormField(
+            initialValue: _password,
             style: AppTextStyles.inputText,
-            decoration: AppTextStyles.inputDecoration(
-              label: 'Mật khẩu',
-              hint: 'Nhập mật khẩu',
+            decoration: InputDecoration(
+              labelText: 'Mật khẩu',
+              labelStyle: AppTextStyles.inputLabel,
+              hintText: 'Nhập mật khẩu',
+              hintStyle: AppTextStyles.inputHint,
               prefixIcon: const Icon(Icons.lock),
               suffixIcon: IconButton(
                 icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
@@ -90,6 +130,10 @@ class _LoginTabState extends State<LoginTab> {
                   });
                 },
               ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
             ),
             obscureText: _obscurePassword,
             validator: (value) {
@@ -101,23 +145,41 @@ class _LoginTabState extends State<LoginTab> {
             onSaved: (value) => _password = value ?? '',
           ),
 
-          const SizedBox(height: 16),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: widget.onForgotPassword,
-              child: const Text(
-                'Quên mật khẩu?',
-                style: TextStyle(color: Color(0xFFFF7B54)),
+          const SizedBox(height: 8),
+
+          Row(
+            children: [
+              Checkbox(
+                value: _rememberMe,
+                // MÀU XANH DƯƠNG TÍM ĐẬM KHI CHỌN
+                activeColor: const Color(0xFF42019C),
+                onChanged: (value) {
+                  setState(() {
+                    _rememberMe = value ?? true;
+                  });
+                },
               ),
-            ),
+              const Text('Ghi nhớ mật khẩu'),
+              const Spacer(),
+              TextButton(
+                onPressed: widget.onForgotPassword,
+                child: const Text(
+                  'Quên mật khẩu?',
+                  style: TextStyle(color: Color(0xFFFF7B54)),
+                ),
+              ),
+            ],
           ),
+
+          const SizedBox(height: 8),
+
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
               onPressed: () {
                 if (widget.formKey.currentState!.validate()) {
                   widget.formKey.currentState!.save();
+                  _saveCredentials();
                   widget.onSubmit(_email, _password);
                 }
               },
