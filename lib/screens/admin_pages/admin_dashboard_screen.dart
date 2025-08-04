@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../components/app_background.dart';
+import 'user_management_screen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -162,7 +163,13 @@ class AdminDashboardScreen extends StatelessWidget {
           crossAxisSpacing: 16,
           childAspectRatio: 1.1,
           children: [
-            _buildDashboardCard(Iconsax.people, 'Người dùng', Colors.blue, () {}),
+            _buildDashboardCard(Iconsax.people, 'Người dùng', Colors.blue, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const UserManagementScreen()),
+              );
+            }),
+
             _buildDashboardCard(Iconsax.book, 'Khóa học', Colors.green, () {}),
             _buildDashboardCard(Iconsax.video_play, 'Bài học', Colors.orange, () {}),
             _buildDashboardCard(Iconsax.document, 'Tài liệu', Colors.purple, () {}),

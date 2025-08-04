@@ -8,8 +8,12 @@ import '../../components/main_navigation.dart';
 class SocialLoginButtons extends StatelessWidget {
   SocialLoginButtons({super.key});
 
+  // You must provide the web client ID for the web platform.
+  // Replace 'YOUR_WEB_CLIENT_ID' with your actual client ID.
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     scopes: ['email'],
+    // Add the web client ID here.
+    clientId: 'YOUR_WEB_CLIENT_ID.apps.googleusercontent.com',
   );
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -24,18 +28,19 @@ class SocialLoginButtons extends StatelessWidget {
         return;
       }
 
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+      await googleUser.authentication;
 
       final AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
 
-      final UserCredential userCredential = await _auth.signInWithCredential(credential);
+      final UserCredential userCredential =
+      await _auth.signInWithCredential(credential);
       final User? user = userCredential.user;
 
       if (user != null) {
-        // Lưu vào Firestore nếu chưa tồn tại
         final docRef = _firestore.collection('users').doc(user.uid);
         final snapshot = await docRef.get();
 
@@ -55,7 +60,6 @@ class SocialLoginButtons extends StatelessWidget {
           context,
           MaterialPageRoute(builder: (_) => const MainNavigation()),
         );
-
       }
     } catch (error) {
       _showMsg(context, 'Đã xảy ra lỗi: $error');
@@ -80,29 +84,21 @@ class SocialLoginButtons extends StatelessWidget {
             child: Text(
               'Hoặc tiếp tục với',
               style: TextStyle(
-                  color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           const Expanded(child: Divider()),
         ]),
-        const SizedBox(height: 10),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildSocialButton(
-              context,
-              icon: 'assets/google_logo.png',
-              label: 'Google',
-              onPressed: () => _handleGoogleSignIn(context),
-            ),
-            const SizedBox(width: 20),
-            _buildSocialButton(
-              context,
-              icon: 'assets/facebook.png',
-              label: 'Facebook',
-              onPressed: () => _showMsg(context, 'Đang đăng nhập bằng Facebook'),
-            ),
-          ],
+        const SizedBox(height: 4), // Giảm khoảng cách top
+        Center(
+          child: _buildSocialButton(
+            context,
+            icon: 'assets/google_logo.png',
+            label: 'Google',
+            onPressed: () => _handleGoogleSignIn(context),
+          ),
         ),
       ],
     );
@@ -121,6 +117,7 @@ class SocialLoginButtons extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(icon, width: 24, height: 24),
           const SizedBox(width: 8),

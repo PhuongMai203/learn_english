@@ -13,8 +13,8 @@ class AppBackground extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFFE6F4FF), // Light blue
-            Color(0xFFFFF9EB), // Light beige
+            Color(0xFFE0F2FF), // Light blue
+            Color(0xFFFDF5E2), // Light beige
           ],
         ),
       ),

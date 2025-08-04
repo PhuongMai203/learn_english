@@ -1,5 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import '../../components/app_background.dart';
+import 'package:learn_english/components/app_background.dart';
+import 'widgets/user_card.dart';
+import 'widgets/user_controller.dart';
 
 class UserManagementScreen extends StatefulWidget {
   const UserManagementScreen({super.key});
@@ -9,103 +12,118 @@ class UserManagementScreen extends StatefulWidget {
 }
 
 class _UserManagementScreenState extends State<UserManagementScreen> {
-  List<Map<String, dynamic>> users = [
-    {
-      'name': 'Nguyễn Văn A',
-      'email': 'a@example.com',
-      'role': 'Học viên',
-      'status': 'Active',
-      'joinDate': '15/06/2024',
-      'avatar': Icons.person
-    },
-    {
-      'name': 'Trần Thị B',
-      'email': 'b@example.com',
-      'role': 'Giáo viên',
-      'status': 'Active',
-      'joinDate': '20/05/2024',
-      'avatar': Icons.person
-    },
-    {
-      'name': 'Lê Văn C',
-      'email': 'c@example.com',
-      'role': 'Quản trị viên',
-      'status': 'Inactive',
-      'joinDate': '10/07/2024',
-      'avatar': Icons.person
-    },
-  ];
-
-  TextEditingController searchController = TextEditingController();
+  List<Map<String, dynamic>> users = [];
+  bool isLoading = true;
   String filter = '';
+  final TextEditingController searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsers();
+  }
+
+  Future<void> _loadUsers() async {
+    setState(() => isLoading = true);
+    try {
+      users = await UserController.fetchUsersFromFirestore();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Lỗi khi tải dữ liệu người dùng.'),
+      ));
+    } finally {
+      setState(() => isLoading = false);
+    }
+  }
+
+  void _deleteUser(int index) {
+    final user = users[index];
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.blue.shade50,
+        title: const Text('Xác nhận xóa'),
+        content: Text('Bạn có chắc chắn muốn xóa tài khoản này không?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Hủy'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await UserController.deleteUser(user['docId']);
+              _loadUsers();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text('Xóa', style: TextStyle(
+              color: Colors.white
+            ),),
+
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showUserDialog({Map<String, dynamic>? user, int? index}) {
-    final nameController = TextEditingController(text: user?['name'] ?? '');
+    final usernameController = TextEditingController(text: user?['username'] ?? '');
     final emailController = TextEditingController(text: user?['email'] ?? '');
     final roleController = TextEditingController(text: user?['role'] ?? '');
-    String? status = user?['status'] ?? 'Active';
 
     showDialog(
       context: context,
       builder: (_) => Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.blue[50],
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
                 user == null ? 'Thêm người dùng' : 'Chỉnh sửa người dùng',
                 style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepPurple),
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
               ),
               const SizedBox(height: 20),
               TextField(
-                controller: nameController,
+                controller: usernameController,
                 decoration: InputDecoration(
-                    labelText: 'Tên người dùng',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.person)),
+                  labelText: 'Tên đăng nhập',
+                  prefixIcon: const Icon(Icons.person, color: Colors.blue),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
               const SizedBox(height: 15),
               TextField(
                 controller: emailController,
                 decoration: InputDecoration(
-                    labelText: 'Email',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.email)),
+                  labelText: 'Email',
+                  prefixIcon: const Icon(Icons.email, color: Colors.blue),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                ),
               ),
               const SizedBox(height: 15),
               TextField(
                 controller: roleController,
                 decoration: InputDecoration(
-                    labelText: 'Vai trò',
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    prefixIcon: const Icon(Icons.work)),
-              ),
-              const SizedBox(height: 15),
-              DropdownButtonFormField<String>(
-                value: status,
-                decoration: InputDecoration(
-                  labelText: 'Trạng thái',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  prefixIcon: const Icon(Icons.circle),
+                  labelText: 'Vai trò',
+                  prefixIcon: const Icon(Icons.work, color: Colors.blue),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                items: const [
-                  DropdownMenuItem(value: 'Active', child: Text('Active')),
-                  DropdownMenuItem(value: 'Inactive', child: Text('Inactive')),
-                ],
-                onChanged: (value) {
-                  status = value;
-                },
               ),
               const SizedBox(height: 25),
               Row(
@@ -113,58 +131,46 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.grey[700],
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 12),
-                    ),
                     child: const Text('Hủy'),
                   ),
                   const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      final name = nameController.text.trim();
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.save),
+                    label: const Text('Lưu'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    onPressed: () async {
+                      final username = usernameController.text.trim();
                       final email = emailController.text.trim();
                       final role = roleController.text.trim();
 
-                      if (name.isEmpty || email.isEmpty || role.isEmpty) return;
-
-                      setState(() {
-                        if (user == null) {
-                          users.add({
-                            'name': name,
-                            'email': email,
-                            'role': role,
-                            'status': status,
-                            'joinDate':
-                            '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
-                            'avatar': Icons.person
-                          });
-                        } else if (index != null) {
-                          users[index] = {
-                            'name': name,
-                            'email': email,
-                            'role': role,
-                            'status': status,
-                            'joinDate': user['joinDate'],
-                            'avatar': user['avatar']
-                          };
-                        }
-                      });
+                      if (username.isEmpty || email.isEmpty || role.isEmpty) return;
 
                       Navigator.pop(context);
+
+                      final Map<String, dynamic> userData = {
+                        'username': username,
+                        'email': email,
+                        'role': role,
+                        'photoURL': '',
+                      };
+
+                      if (user == null) {
+                        userData['createdAt'] = FieldValue.serverTimestamp();
+                        await UserController.addUser(userData);
+                      } else {
+                        await UserController.updateUser(user['docId'], userData);
+                      }
+
+                      _loadUsers();
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepPurple,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 25, vertical: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text('Lưu'),
                   ),
                 ],
-              ),
+              )
             ],
           ),
         ),
@@ -172,43 +178,13 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     );
   }
 
-  void _deleteUser(int index) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Xác nhận xóa'),
-        content: Text(
-            'Bạn có chắc chắn muốn xóa người dùng "${users[index]['name']}"?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                users.removeAt(index);
-              });
-              Navigator.pop(context);
-            },
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Xóa'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final filteredUsers = users.where((user) {
-      final name = user['name'].toString().toLowerCase();
-      final email = user['email'].toString().toLowerCase();
-      final role = user['role'].toString().toLowerCase();
-      final searchTerm = filter.toLowerCase();
-      return name.contains(searchTerm) ||
-          email.contains(searchTerm) ||
-          role.contains(searchTerm);
+    final filteredUsers = users.where((u) {
+      final search = filter.toLowerCase();
+      return (u['username'] ?? '').toLowerCase().contains(search) ||
+          (u['email'] ?? '').toLowerCase().contains(search) ||
+          (u['role'] ?? '').toLowerCase().contains(search);
     }).toList();
 
     return AppBackground(
@@ -217,133 +193,50 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         appBar: AppBar(
           title: const Text(
             'Quản lý người dùng',
-            style: TextStyle(
-              color: Colors.deepPurple,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold),
           ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.person_add, color: Colors.deepPurple),
-              tooltip: 'Thêm người dùng',
-              onPressed: () => _showUserDialog(),
-            ),
+            IconButton(icon: const Icon(Icons.refresh), onPressed: _loadUsers),
+            IconButton(icon: const Icon(Icons.add), onPressed: () => _showUserDialog()),
           ],
         ),
-        body: Column(
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
           children: [
             Padding(
               padding: const EdgeInsets.all(16),
               child: TextField(
                 controller: searchController,
-                decoration: InputDecoration(
+                onChanged: (v) => setState(() => filter = v),
+                decoration: const InputDecoration(
+                  prefixIcon: Icon(Icons.search, color: Colors.deepPurple),
                   hintText: 'Tìm kiếm người dùng...',
-                  prefixIcon: const Icon(Icons.search, color: Colors.deepPurple),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding:
-                  const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                  ),
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    filter = value;
-                  });
-                },
               ),
             ),
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: filteredUsers.length,
-                itemBuilder: (context, index) {
-                  final user = filteredUsers[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    child: ListTile(
-                      contentPadding: const EdgeInsets.all(16),
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.deepPurple[100],
-                        child: Icon(user['avatar'], color: Colors.deepPurple),
-                      ),
-                      title: Text(
-                        user['name'],
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const SizedBox(height: 4),
-                          Text(user['email']),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: user['status'] == 'Active'
-                                      ? Colors.green[50]
-                                      : Colors.orange[50],
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  user['status'],
-                                  style: TextStyle(
-                                      color: user['status'] == 'Active'
-                                          ? Colors.green
-                                          : Colors.orange,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.blue[50],
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  user['role'],
-                                  style: TextStyle(
-                                      color: Colors.blue[700],
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w500),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.orange),
-                            onPressed: () => _showUserDialog(
-                                user: user, index: users.indexOf(user)),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _deleteUser(users.indexOf(user)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
+                itemBuilder: (_, i) => UserCard(
+                  user: filteredUsers[i],
+                  onEdit: () => _showUserDialog(user: filteredUsers[i], index: i),
+                  onDelete: () => _deleteUser(users.indexOf(filteredUsers[i])),
+                ),
               ),
             ),
           ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () => _showUserDialog(),
+          backgroundColor: Colors.deepPurple,
+          child: const Icon(Icons.add),
         ),
       ),
     );

@@ -33,7 +33,7 @@ class LearningContentScreen extends StatelessWidget {
           child: TabBarView(
             children: [
               CoursesTab(),
-              LessonsTab(),
+              LessonListScreen(),
               ExercisesTab(),
               VocabGrammarTab(),
             ],
