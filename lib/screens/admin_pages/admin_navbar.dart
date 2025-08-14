@@ -17,7 +17,7 @@ class _AdminNavbarState extends State<AdminNavbar> {
 
   final List<Widget> _screens = [
     const AdminDashboardScreen(),
-    const LearningContentScreen(),
+    LearningContentScreen(),
     const UserManagementScreen(),
     UtilitiesScreen(),
     const SystemSettingsScreen(),

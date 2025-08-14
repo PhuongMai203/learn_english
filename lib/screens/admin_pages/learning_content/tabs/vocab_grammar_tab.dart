@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../components/app_background.dart';
+import 'widgets/GrammarScreen.dart';
+import 'widgets/VocabularyScreen.dart';
 
 class VocabGrammarTab extends StatelessWidget {
   const VocabGrammarTab({super.key});
@@ -25,7 +27,9 @@ class VocabGrammarTab extends StatelessWidget {
                     icon: LucideIcons.bookOpen,
                     color: const Color(0xFFFFF3CD), // Vàng pastel nhạt
                     onTap: () {
-                      // TODO: điều hướng đến quản lý từ vựng
+                      Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const VocabularyScreen())
+                      );
                     },
                   ),
                   const SizedBox(height: 12),
@@ -35,7 +39,9 @@ class VocabGrammarTab extends StatelessWidget {
                     icon: LucideIcons.fileText,
                     color: const Color(0xFFFFE0B2), // Cam pastel nhạt
                     onTap: () {
-                      // TODO: điều hướng đến quản lý ngữ pháp
+                      Navigator.push(context,
+                        MaterialPageRoute(builder: (_)=> const GrammarScreen())
+                      );
                     },
                   ),
                 ],

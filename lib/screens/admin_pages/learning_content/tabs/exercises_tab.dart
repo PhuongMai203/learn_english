@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../components/app_background.dart';
+import 'widgets/CreateListeningExerciseScreen.dart';
+import 'widgets/CreateWritingExerciseScreen.dart';
+import 'widgets/ListeningExercisesListScreen.dart';
+import 'widgets/WritingExercisesListScreen.dart';
 
 class ExercisesTab extends StatelessWidget {
   const ExercisesTab({super.key});
@@ -10,45 +14,72 @@ class ExercisesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppBackground(
       child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        padding: const EdgeInsets.all(16),
+        child: ListView(
           children: [
+            const Text(
+              'Quản lý bài tập theo kỹ năng',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 24),
 
-            const SizedBox(height: 20),
-            Wrap(
-              spacing: 16,
-              runSpacing: 16,
-              children: [
-                _buildCard(
+            // Nhóm: Kỹ năng Nghe
+            _buildSectionTitle('🟢 Kỹ năng Nghe'),
+            _buildAdminOption(
+              context,
+              icon: LucideIcons.headphones,
+              title: 'Danh sách bài tập Nghe',
+              onTap: () {
+                Navigator.push(
                   context,
-                  title: 'Danh sách bài tập',
-                  icon: LucideIcons.fileText,
-                  color: const Color(0xFFFFCC80), // pastel orange
-                  onTap: () {},
-                ),
-                _buildCard(
+                  MaterialPageRoute(builder: (_) => const ListeningExercisesListScreen()),
+                );
+              },
+
+            ),
+            _buildAdminOption(
+              context,
+              icon: LucideIcons.filePlus,
+              title: 'Tạo bài tập Nghe',
+              onTap: () {
+                Navigator.push(
                   context,
-                  title: 'Tạo bài tập mới',
-                  icon: LucideIcons.filePlus,
-                  color: const Color(0xFFFFE0B2),
-                  onTap: () {},
-                ),
-                _buildCard(
+                  MaterialPageRoute(builder: (_) => const CreateListeningExerciseScreen()),
+                );
+              },
+
+            ),
+
+            const SizedBox(height: 24),
+
+            // Nhóm: Kỹ năng Viết
+            _buildSectionTitle('🟣 Kỹ năng Viết'),
+            _buildAdminOption(
+              context,
+              icon: LucideIcons.penLine,
+              title: 'Danh sách bài tập Viết',
+              onTap: () {
+                Navigator.push(
                   context,
-                  title: 'Phân loại theo kỹ năng',
-                  icon: LucideIcons.layers,
-                  color: const Color(0xFFFFAB91),
-                  onTap: () {},
-                ),
-                _buildCard(
+                  MaterialPageRoute(builder: (_) => const WritingExercisesListScreen()),
+                );
+              },
+
+            ),
+            _buildAdminOption(
+              context,
+              icon: LucideIcons.filePlus,
+              title: 'Tạo bài tập Viết',
+              onTap: () {
+                Navigator.push(
                   context,
-                  title: 'Thống kê & Báo cáo',
-                  icon: LucideIcons.chartBar,
-                  color: const Color(0xFFFFE0B2),
-                  onTap: () {},
-                ),
-              ],
+                  MaterialPageRoute(builder: (_) => const CreateWritingExerciseScreen()),
+                );
+              },
+
             ),
           ],
         ),
@@ -56,46 +87,38 @@ class ExercisesTab extends StatelessWidget {
     );
   }
 
-  Widget _buildCard(
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.black87,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdminOption(
       BuildContext context, {
-        required String title,
         required IconData icon,
-        required Color color,
+        required String title,
         required VoidCallback onTap,
       }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 160,
-        height: 140,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6,
-              offset: Offset(2, 2),
-            ),
-          ],
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      elevation: 1.5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        leading: Icon(icon, size: 26, color: Colors.deepOrange),
+        title: Text(
+          title,
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         ),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 38, color: Colors.deepOrange),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-          ],
-        ),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 14),
+        onTap: onTap,
       ),
     );
   }

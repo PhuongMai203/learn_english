@@ -5,9 +5,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as path;
-import 'package:video_player/video_player.dart'; // ✅ Thêm dòng này
+import 'package:video_player/video_player.dart';
 
 import '../../../../../components/app_background.dart';
+import '../../../widgets/VideoThumbnailWidget.dart';
 
 class EditLessonScreen extends StatefulWidget {
   final String courseId;
@@ -37,25 +38,36 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
 
   final picker = ImagePicker();
 
-  VideoPlayerController? _videoController; // ✅
+  VideoPlayerController? _videoController;
+  bool _isVideoPlaying = false; // Thêm trạng thái phát video
 
   bool get isYoutubeLink =>
-      _mediaUrl?.contains("youtube.com") == true || _mediaUrl?.contains("youtu.be") == true;
+      _mediaUrl?.contains("youtube.com") == true ||
+          _mediaUrl?.contains("youtu.be") == true;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.lessonData['title']);
-    _descriptionController = TextEditingController(text: widget.lessonData['description']);
+    _descriptionController =
+        TextEditingController(text: widget.lessonData['description']);
     _youtubeLinkController = TextEditingController(
-      text: widget.lessonData['mediaUrl']?.toString().contains("youtube.com") == true
+      text: widget.lessonData['mediaUrl']?.toString().contains("youtube.com") ==
+          true
           ? widget.lessonData['mediaUrl']
           : '',
     );
     _mediaUrl = widget.lessonData['mediaUrl'];
 
-    if (_mediaUrl != null && _mediaUrl!.endsWith(".mp4")) {
-      _initializeVideo(_mediaUrl!); // ✅
+    if (_mediaUrl != null && _mediaUrl!.isNotEmpty && !isYoutubeLink) {
+      _checkAndInitializeMedia();
+    }
+  }
+
+  void _checkAndInitializeMedia() {
+    final fileType = _getFileType(_mediaUrl!);
+    if (fileType == 'mp4') {
+      _initializeVideo(_mediaUrl!);
     }
   }
 
@@ -64,15 +76,25 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
     _titleController.dispose();
     _descriptionController.dispose();
     _youtubeLinkController.dispose();
-    _videoController?.dispose(); // ✅
+    _videoController?.dispose();
     super.dispose();
   }
 
   Future<void> _initializeVideo(String url) async {
     _videoController?.dispose();
-    _videoController = VideoPlayerController.networkUrl(Uri.parse(url));
-    await _videoController!.initialize();
-    setState(() {});
+    _videoController = VideoPlayerController.networkUrl(Uri.parse(url))
+      ..initialize().then((_) {
+        setState(() {});
+      });
+  }
+
+  // Hàm mới: Khởi tạo video từ file cục bộ
+  Future<void> _initializeVideoFromFile(File file) async {
+    _videoController?.dispose();
+    _videoController = VideoPlayerController.file(file)
+      ..initialize().then((_) {
+        setState(() {});
+      });
   }
 
   Future<void> _pickMedia(ImageSource source, {bool isVideo = false}) async {
@@ -81,16 +103,31 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
         : await picker.pickImage(source: source);
 
     if (pickedFile != null) {
+      final file = File(pickedFile.path);
       setState(() {
-        _selectedMedia = File(pickedFile.path);
+        _selectedMedia = file;
       });
+
+      // Nếu là video, khởi tạo controller để xem trước
+      if (isVideo) {
+        await _initializeVideoFromFile(file);
+      } else {
+        // Nếu là ảnh, hủy video controller nếu có
+        _videoController?.dispose();
+        setState(() {
+          _videoController = null;
+        });
+      }
     }
   }
 
   Future<String?> _uploadToFirebase(File file) async {
     try {
-      final fileName = '${DateTime.now().millisecondsSinceEpoch}_${path.basename(file.path)}';
-      final ref = FirebaseStorage.instance.ref().child('lessons').child(fileName);
+      final originalFileName = path.basename(file.path);
+      final fileName =
+          '${DateTime.now().millisecondsSinceEpoch}_$originalFileName';
+      final ref =
+      FirebaseStorage.instance.ref().child('lessons').child(fileName);
 
       final uploadTask = await ref.putFile(file);
       final downloadUrl = await uploadTask.ref.getDownloadURL();
@@ -153,6 +190,95 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
     }
   }
 
+  String? _getFileType(String url) {
+    try {
+      final uri = Uri.parse(url);
+      String path = uri.path;
+      int lastDotIndex = path.lastIndexOf('.');
+      if (lastDotIndex != -1 && lastDotIndex < path.length - 1) {
+        return path.substring(lastDotIndex + 1).toLowerCase();
+      }
+      return null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Hàm mới: Xây dựng giao diện xem video
+  Widget _buildVideoPlayer() {
+    if (_videoController == null || !_videoController!.value.isInitialized) {
+      return const CircularProgressIndicator();
+    }
+
+    return Column(
+      children: [
+        AspectRatio(
+          aspectRatio: _videoController!.value.aspectRatio,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              VideoPlayer(_videoController!),
+              IconButton(
+                icon: Icon(
+                  _videoController!.value.isPlaying
+                      ? Icons.pause
+                      : Icons.play_arrow,
+                  size: 50,
+                  color: Colors.white.withOpacity(0.7),
+                ),
+                onPressed: () {
+                  setState(() {
+                    if (_videoController!.value.isPlaying) {
+                      _videoController!.pause();
+                    } else {
+                      _videoController!.play();
+                    }
+                  });
+                },
+              ),
+            ],
+          ),
+        ),
+        VideoProgressIndicator(
+          _videoController!,
+          allowScrubbing: true,
+          colors: const VideoProgressColors(
+            playedColor: Colors.orange,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMediaPreview(String url) {
+    final fileType = _getFileType(url);
+
+    if (fileType == null) {
+      return const Text("📁 File không hỗ trợ xem trước");
+    }
+
+    switch (fileType) {
+      case 'mp4':
+      case 'mov':
+      case 'avi':
+        return _buildVideoPlayer(); // Sử dụng video player mới
+      case 'jpg':
+      case 'jpeg':
+      case 'png':
+      case 'gif':
+      case 'webp':
+        return Image.network(
+          url,
+          height: 180,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) =>
+          const Text('❌ Không tải được ảnh'),
+        );
+      default:
+        return const Text("📁 File không hỗ trợ xem trước");
+    }
+  }
+
   Widget _buildMediaSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,13 +310,21 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
           ],
         ),
         const SizedBox(height: 8),
+
+        // Hiển thị media được chọn từ máy
         if (_selectedMedia != null)
-          Text(
-            "Đã chọn: ${path.basename(_selectedMedia!.path)}",
-            overflow: TextOverflow.ellipsis,
+          _selectedMedia!.path.endsWith('.mp4')
+              ? _buildVideoPlayer()
+              : Image.file(
+            _selectedMedia!,
+            height: 180,
+            fit: BoxFit.cover,
           ),
+
         const SizedBox(height: 12),
-        if (_mediaUrl != null && _mediaUrl!.isNotEmpty)
+
+        // Hiển thị media từ Firebase nếu không chọn file mới
+        if (_selectedMedia == null && _mediaUrl != null && _mediaUrl!.isNotEmpty)
           isYoutubeLink
               ? Text("Đang dùng link YouTube: $_mediaUrl")
               : Column(
@@ -198,46 +332,7 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
             children: [
               const Text("Media hiện tại:"),
               const SizedBox(height: 8),
-              if (_mediaUrl!.endsWith(".mp4"))
-                _videoController != null && _videoController!.value.isInitialized
-                    ? AspectRatio(
-                  aspectRatio: _videoController!.value.aspectRatio,
-                  child: Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      VideoPlayer(_videoController!),
-                      VideoProgressIndicator(_videoController!, allowScrubbing: true),
-                      Positioned(
-                        bottom: 8,
-                        right: 8,
-                        child: IconButton(
-                          icon: Icon(
-                            _videoController!.value.isPlaying
-                                ? Icons.pause
-                                : Icons.play_arrow,
-                            color: Colors.white,
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              _videoController!.value.isPlaying
-                                  ? _videoController!.pause()
-                                  : _videoController!.play();
-                            });
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                )
-                    : const Text("🔄 Đang tải video...")
-              else
-                Image.network(
-                  _mediaUrl!,
-                  height: 180,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                  const Text('❌ Không tải được ảnh'),
-                ),
+              _buildMediaPreview(_mediaUrl!),
             ],
           ),
       ],
@@ -250,7 +345,8 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text('Chỉnh sửa bài học', style: TextStyle(color: Colors.orange.shade200)),
+          title: Text('Chỉnh sửa bài học',
+              style: TextStyle(color: Colors.orange.shade200)),
           backgroundColor: Colors.white,
           centerTitle: true,
         ),
@@ -267,7 +363,8 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
                     border: OutlineInputBorder(),
                     prefixIcon: Icon(Icons.title),
                   ),
-                  validator: (value) => value == null || value.isEmpty ? 'Nhập tiêu đề' : null,
+                  validator: (value) =>
+                  value == null || value.isEmpty ? 'Nhập tiêu đề' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
@@ -278,7 +375,8 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
                     prefixIcon: Icon(Icons.description),
                   ),
                   maxLines: 3,
-                  validator: (value) => value == null || value.isEmpty ? 'Nhập mô tả' : null,
+                  validator: (value) =>
+                  value == null || value.isEmpty ? 'Nhập mô tả' : null,
                 ),
                 const SizedBox(height: 16),
                 _buildMediaSection(),
