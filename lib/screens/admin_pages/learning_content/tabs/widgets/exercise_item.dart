@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'exercise_form.dart';
 
 class ExerciseItem extends StatelessWidget {
   final Map<String, dynamic> exercise;
@@ -19,10 +18,16 @@ class ExerciseItem extends StatelessWidget {
 
   void _delete(BuildContext context) async {
     try {
-      await firestore.collection('vocabulary_exercises').doc(exercise['id']).delete();
+      await firestore
+          .collection('vocabulary_exercises')
+          .doc(exercise['id'])
+          .delete();
       onUpdated();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Xóa thành công'), backgroundColor: Colors.green),
+        const SnackBar(
+          content: Text('Xóa thành công'),
+          backgroundColor: Colors.green,
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -34,23 +39,20 @@ class ExerciseItem extends StatelessWidget {
   void _edit(BuildContext context) {
     showDialog(
       context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Chỉnh sửa bài tập'),
-        content: ExerciseFormDialog(
-          firestore: firestore,
-          courses: courses,
-          exercise: exercise,
-          onSaved: onUpdated,
-        ),
+      builder: (_) => ExerciseFormDialog(
+        firestore: firestore,
+        courses: courses,
+        exercise: exercise,
+        onSaved: onUpdated,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final wordsCount = (exercise['words'] as List<dynamic>?)?.length ?? 0;
     return Container(
       padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(16),
@@ -65,25 +67,30 @@ class ExerciseItem extends StatelessWidget {
       child: Row(
         children: [
           Icon(LucideIcons.clipboardList, size: 28, color: Colors.black87),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(exercise['title'] ?? '', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 4),
-              ],
+            child: Text(
+              exercise['title'] ?? '',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
-          IconButton(icon: const Icon(Icons.edit, color: Colors.blue), onPressed: () => _edit(context)),
-          IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _delete(context)),
+          IconButton(
+            icon: const Icon(Icons.edit, color: Colors.blue),
+            onPressed: () => _edit(context),
+          ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.red),
+            onPressed: () => _delete(context),
+          ),
         ],
       ),
     );
   }
 }
 
-// Form dialog dùng khi chỉnh sửa
 class ExerciseFormDialog extends StatefulWidget {
   final FirebaseFirestore firestore;
   final List<Map<String, dynamic>> courses;
@@ -105,9 +112,14 @@ class ExerciseFormDialog extends StatefulWidget {
 class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
-  final _wordsController = TextEditingController();
+  final _questionController = TextEditingController();
+  final _optionAController = TextEditingController();
+  final _optionBController = TextEditingController();
+  final _optionCController = TextEditingController();
+  final _optionDController = TextEditingController();
   String? _selectedCourseId;
   String? _selectedLessonId;
+  String? _correctAnswer;
   List<Map<String, dynamic>> _lessons = [];
 
   @override
@@ -115,10 +127,21 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
     super.initState();
     final ex = widget.exercise;
     _titleController.text = ex['title'] ?? '';
-    _wordsController.text = (ex['words'] as List<dynamic>).join(', ');
+    _questionController.text =
+    (ex['words'] as List<dynamic>?)?.isNotEmpty == true
+        ? ex['words'][0]
+        : '';
+    final options = ex['options'] as Map<String, dynamic>? ?? {};
+    _optionAController.text = options['A'] ?? '';
+    _optionBController.text = options['B'] ?? '';
+    _optionCController.text = options['C'] ?? '';
+    _optionDController.text = options['D'] ?? '';
+    _correctAnswer = ex['correctAnswer'];
     _selectedCourseId = ex['courseId'];
     _selectedLessonId = ex['lessonId'];
-    _fetchLessons(_selectedCourseId!);
+    if (_selectedCourseId != null) {
+      _fetchLessons(_selectedCourseId!);
+    }
   }
 
   Future<void> _fetchLessons(String courseId) async {
@@ -142,10 +165,20 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
       'title': _titleController.text.trim(),
       'courseId': _selectedCourseId,
       'lessonId': _selectedLessonId,
-      'words': _wordsController.text.split(',').map((e) => e.trim()).toList(),
+      'words': [_questionController.text.trim()],
+      'options': {
+        'A': _optionAController.text.trim(),
+        'B': _optionBController.text.trim(),
+        'C': _optionCController.text.trim(),
+        'D': _optionDController.text.trim(),
+      },
+      'correctAnswer': _correctAnswer,
     };
     try {
-      await widget.firestore.collection('vocabulary_exercises').doc(widget.exercise['id']).update(data);
+      await widget.firestore
+          .collection('vocabulary_exercises')
+          .doc(widget.exercise['id'])
+          .update(data);
       widget.onSaved();
       Navigator.pop(context);
     } catch (e) {
@@ -155,49 +188,161 @@ class _ExerciseFormDialogState extends State<ExerciseFormDialog> {
     }
   }
 
-  void _onCourseChanged(String? value) {
-    setState(() {
-      _selectedCourseId = value;
-      _selectedLessonId = null;
-      _lessons = [];
-    });
-    if (value != null) _fetchLessons(value);
+  Widget _buildTextField(TextEditingController controller, String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          filled: true,
+          fillColor: Colors.grey.shade50,
+        ),
+        validator: (v) => v!.isEmpty ? 'Vui lòng nhập $label' : null,
+      ),
+    );
+  }
+
+  Widget _buildDropdownCourse() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: DropdownButtonFormField<String>(
+        value: _selectedCourseId,
+        isExpanded: true,
+        decoration: InputDecoration(
+          labelText: 'Chọn khóa học',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        items: widget.courses
+            .map((c) => DropdownMenuItem(
+            value: c['id'] as String,
+            child: Text(c['title'] ?? 'No title')))
+            .toList(),
+        onChanged: (v) {
+          setState(() {
+            _selectedCourseId = v;
+            _selectedLessonId = null;
+            _lessons = [];
+          });
+          if (v != null) _fetchLessons(v);
+        },
+        validator: (v) => v == null ? 'Vui lòng chọn khóa học' : null,
+      ),
+    );
+  }
+
+  Widget _buildDropdownLesson() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
+      child: DropdownButtonFormField<String>(
+        value: _selectedLessonId,
+        isExpanded: true,
+        decoration: InputDecoration(
+          labelText: 'Chọn bài học',
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        items: _lessons
+            .map((l) => DropdownMenuItem(
+            value: l['id'] as String, child: Text(l['title'] ?? 'No title')))
+            .toList(),
+        onChanged: (v) => setState(() => _selectedLessonId = v),
+        validator: (v) => v == null ? 'Vui lòng chọn bài học' : null,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.maxFinite,
-      child: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              TextFormField(controller: _titleController, decoration: const InputDecoration(labelText: 'Tên bài tập'), validator: (v) => v!.isEmpty ? 'Vui lòng nhập tên bài tập' : null),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: _selectedCourseId,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Chọn khóa học'),
-                items: widget.courses.map((c) => DropdownMenuItem(value: c['id'] as String, child: Text(c['title'] ?? 'No title'))).toList(),
-                onChanged: _onCourseChanged,
-                validator: (v) => v == null ? 'Vui lòng chọn khóa học' : null,
+    return Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      insetPadding: const EdgeInsets.all(16),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Row(
+              children: [
+                const Icon(Icons.edit_note, size: 28, color: Colors.blue),
+                const SizedBox(width: 8),
+                const Expanded(
+                  child: Text(
+                    'Chỉnh sửa bài tập',
+                    style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close, color: Colors.grey),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+            const Divider(),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      _buildTextField(_titleController, 'Tên bài tập'),
+                      _buildDropdownCourse(),
+                      _buildDropdownLesson(),
+                      _buildTextField(_questionController, 'Câu hỏi'),
+                      _buildTextField(_optionAController, 'Đáp án A'),
+                      _buildTextField(_optionBController, 'Đáp án B'),
+                      _buildTextField(_optionCController, 'Đáp án C'),
+                      _buildTextField(_optionDController, 'Đáp án D'),
+                      DropdownButtonFormField<String>(
+                        value: _correctAnswer,
+                        decoration: InputDecoration(
+                          labelText: 'Đáp án đúng',
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                        ),
+                        items: ['A', 'B', 'C', 'D']
+                            .map((opt) =>
+                            DropdownMenuItem(value: opt, child: Text(opt)))
+                            .toList(),
+                        onChanged: (v) => setState(() => _correctAnswer = v),
+                        validator: (v) =>
+                        v == null ? 'Vui lòng chọn đáp án đúng' : null,
+                      ),
+                      const SizedBox(height: 20),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: _save,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
+                          ),
+                          icon: const Icon(Icons.save, color: Colors.white),
+                          label: const Text(
+                            'Lưu thay đổi',
+                            style:
+                            TextStyle(fontSize: 16, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                value: _selectedLessonId,
-                isExpanded: true,
-                decoration: const InputDecoration(labelText: 'Chọn bài học'),
-                items: _lessons.map((l) => DropdownMenuItem(value: l['id'] as String, child: Text(l['title'] ?? 'No title'))).toList(),
-                onChanged: (v) => setState(() => _selectedLessonId = v),
-                validator: (v) => v == null ? 'Vui lòng chọn bài học' : null,
-              ),
-              const SizedBox(height: 12),
-              TextFormField(controller: _wordsController, decoration: const InputDecoration(labelText: 'Từ vựng (cách nhau bằng dấu ,)'), validator: (v) => v!.isEmpty ? 'Vui lòng nhập từ vựng' : null),
-              const SizedBox(height: 16),
-              ElevatedButton(onPressed: _save, child: const Text('Lưu')),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

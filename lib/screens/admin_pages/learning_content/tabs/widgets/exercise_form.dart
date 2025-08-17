@@ -21,8 +21,13 @@ class _ExerciseFormState extends State<ExerciseForm> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _wordsController = TextEditingController();
-  final _correctController = TextEditingController();
 
+  final _optionAController = TextEditingController();
+  final _optionBController = TextEditingController();
+  final _optionCController = TextEditingController();
+  final _optionDController = TextEditingController();
+
+  String? _correctAnswer;
   String? _selectedCourseId;
   String? _selectedLessonId;
   List<Map<String, dynamic>> _lessons = [];
@@ -45,12 +50,20 @@ class _ExerciseFormState extends State<ExerciseForm> {
   Future<void> _saveExercise({String? docId}) async {
     if (!_formKey.currentState!.validate()) return;
 
+    final options = {
+      'A': _optionAController.text.trim(),
+      'B': _optionBController.text.trim(),
+      'C': _optionCController.text.trim(),
+      'D': _optionDController.text.trim(),
+    };
+
     final data = {
       'title': _titleController.text.trim(),
       'courseId': _selectedCourseId,
       'lessonId': _selectedLessonId,
       'words': _wordsController.text.split(',').map((e) => e.trim()).toList(),
-      'correctAnswer': _correctController.text.trim(),
+      'options': options,
+      'correctAnswer': _correctAnswer,
       'createdAt': FieldValue.serverTimestamp(),
     };
 
@@ -61,9 +74,14 @@ class _ExerciseFormState extends State<ExerciseForm> {
         await widget.firestore.collection('vocabulary_exercises').add(data);
       }
 
+      // Reset form
       _titleController.clear();
       _wordsController.clear();
-      _correctController.clear();
+      _optionAController.clear();
+      _optionBController.clear();
+      _optionCController.clear();
+      _optionDController.clear();
+      _correctAnswer = null;
       _selectedCourseId = null;
       _selectedLessonId = null;
       _lessons = [];
@@ -97,108 +115,278 @@ class _ExerciseFormState extends State<ExerciseForm> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.all(20),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Tên bài tập
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  labelText: 'Tên bài tập',
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                validator: (v) => v!.isEmpty ? 'Vui lòng nhập tên bài tập' : null,
-              ),
-              const SizedBox(height: 12),
+      padding: const EdgeInsets.all(20),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 16),
 
-              // Chọn khóa học
-              DropdownButtonFormField<String>(
-                value: _selectedCourseId,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  labelText: 'Chọn khóa học',
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                items: widget.courses
-                    .map((c) => DropdownMenuItem(
-                  value: c['id'] as String,
-                  child: Text(c['title'] ?? 'No title'),
-                ))
-                    .toList(),
-                onChanged: _onCourseChanged,
-                validator: (v) => v == null ? 'Vui lòng chọn khóa học' : null,
-              ),
-              const SizedBox(height: 12),
+            // Tên bài tập
+            TextFormField(
+              controller: _titleController,
+              decoration: _inputDecoration('Tên bài tập', Icons.title),
+              validator: (v) => v!.isEmpty ? 'Vui lòng nhập tên bài tập' : null,
+            ),
+            const SizedBox(height: 16),
 
-              // Chọn bài học
-              DropdownButtonFormField<String>(
-                value: _selectedLessonId,
-                isExpanded: true,
-                decoration: InputDecoration(
-                  labelText: 'Chọn bài học',
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+            // Course and lesson selection
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Chọn khóa học', style: _labelStyle()),
+                      const SizedBox(height: 8),
+                      _buildCourseDropdown(),
+                    ],
+                  ),
                 ),
-                items: _lessons
-                    .map((l) => DropdownMenuItem(
-                  value: l['id'] as String,
-                  child: Text(l['title'] ?? 'No title'),
-                ))
-                    .toList(),
-                onChanged: (v) => setState(() => _selectedLessonId = v),
-                validator: (v) => v == null ? 'Vui lòng chọn bài học' : null,
-              ),
-              const SizedBox(height: 12),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Chọn bài học', style: _labelStyle()),
+                      const SizedBox(height: 8),
+                      _buildLessonDropdown(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
 
-              // Nhập từ vựng
-              TextFormField(
-                controller: _wordsController,
-                decoration: InputDecoration(
-                  labelText: 'Từ vựng (cách nhau bằng dấu ,)',
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                validator: (v) => v!.isEmpty ? 'Vui lòng nhập từ vựng' : null,
+            // Vocabulary section
+            _buildSectionHeader('Từ vựng'),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _wordsController,
+              decoration: _inputDecoration(
+                'Từ vựng (cách nhau bằng dấu ,)',
+                Icons.text_fields,
               ),
-              const SizedBox(height: 12),
+              maxLines: 2,
+              validator: (v) => v!.isEmpty ? 'Vui lòng nhập từ vựng' : null,
+            ),
+            const SizedBox(height: 20),
 
-              // Nhập kết quả đúng
-              TextFormField(
-                controller: _correctController,
-                decoration: InputDecoration(
-                  labelText: 'Kết quả đúng',
-                  hintText: 'Nhập đáp án đúng của bài tập',
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                validator: (v) => v!.isEmpty ? 'Vui lòng nhập kết quả đúng' : null,
-              ),
-              const SizedBox(height: 16),
+            // Options section
+            _buildSectionHeader('Phương án trả lời'),
+            const SizedBox(height: 16),
+            _buildOptionsGrid(),
+            const SizedBox(height: 16),
 
-              ElevatedButton.icon(
-                icon: const Icon(Icons.save),
-                label: const Text('Lưu bài tập'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.blue.shade700,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () => _saveExercise(),
-              ),
-            ],
+            // Correct answer selection
+            Text('Chọn đáp án đúng', style: _labelStyle()),
+            const SizedBox(height: 8),
+            _buildCorrectAnswerDropdown(),
+            const SizedBox(height: 24),
+
+            // Save button
+            _buildSaveButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Container(
+      padding: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Colors.blue.shade700,
+            width: 2,
           ),
         ),
-      );
+      ),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
+          color: Colors.blue.shade800,
+        ),
+      ),
+    );
+  }
+
+  TextStyle _labelStyle() {
+    return TextStyle(
+      fontWeight: FontWeight.w600,
+      color: Colors.grey.shade700,
+    );
+  }
+
+  InputDecoration _inputDecoration(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: Colors.blue.shade700),
+      filled: true,
+      fillColor: Colors.grey.shade100,
+      contentPadding: const EdgeInsets.symmetric(
+        vertical: 14,
+        horizontal: 16,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+    );
+  }
+
+
+  Widget _buildCourseDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedCourseId,
+      isExpanded: true,
+      decoration: _inputDecoration('', Icons.school),
+      items: widget.courses
+          .map((c) => DropdownMenuItem(
+        value: c['id'] as String,
+        child: Text(c['title'] ?? 'No title'),
+      ))
+          .toList(),
+      onChanged: _onCourseChanged,
+      validator: (v) => v == null ? 'Vui lòng chọn khóa học' : null,
+    );
+  }
+
+  Widget _buildLessonDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedLessonId,
+      isExpanded: true,
+      decoration: _inputDecoration('', Icons.menu_book),
+      items: _lessons
+          .map((l) => DropdownMenuItem(
+        value: l['id'] as String,
+        child: Text(l['title'] ?? 'No title'),
+      ))
+          .toList(),
+      onChanged: (v) => setState(() => _selectedLessonId = v),
+      validator: (v) => v == null ? 'Vui lòng chọn bài học' : null,
+    );
+  }
+
+  Widget _buildOptionsGrid() {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      childAspectRatio: 3,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      children: [
+        _buildOptionField('A', _optionAController, Colors.red.shade400),
+        _buildOptionField('B', _optionBController, Colors.blue.shade400),
+        _buildOptionField('C', _optionCController, Colors.green.shade400),
+        _buildOptionField('D', _optionDController, Colors.amber.shade700),
+      ],
+    );
+  }
+
+  Widget _buildOptionField(String label, TextEditingController controller, Color color) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: 'Phương án $label',
+        filled: true,
+        fillColor: color.withOpacity(0.1),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        prefixIcon: Container(
+          margin: const EdgeInsets.all(6),
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+      validator: (v) => v!.isEmpty ? 'Vui lòng nhập phương án $label' : null,
+    );
+  }
+
+  Widget _buildCorrectAnswerDropdown() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: DropdownButton<String>(
+        value: _correctAnswer,
+        isExpanded: true,
+        underline: const SizedBox(),
+        icon: Icon(Icons.arrow_drop_down, color: Colors.blue.shade700),
+        hint: const Text('Chọn đáp án đúng'),
+        items: [
+          _buildAnswerItem('A', Colors.red.shade400),
+          _buildAnswerItem('B', Colors.blue.shade400),
+          _buildAnswerItem('C', Colors.green.shade400),
+          _buildAnswerItem('D', Colors.amber.shade700),
+        ],
+        onChanged: (value) => setState(() => _correctAnswer = value),
+      ),
+    );
+  }
+
+  DropdownMenuItem<String> _buildAnswerItem(String value, Color color) {
+    return DropdownMenuItem(
+      value: value,
+      child: Row(
+        children: [
+          Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text('Phương án $value'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSaveButton() {
+    return ElevatedButton.icon(
+      icon: const Icon(Icons.save),
+      label: const Text('Lưu bài tập'),
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        backgroundColor: Colors.blue.shade700,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12)),
+        elevation: 3,
+        shadowColor: Colors.blue.shade200,
+      ),
+      onPressed: () => _saveExercise(),
+    );
   }
 }

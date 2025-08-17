@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../../../../components/app_background.dart';
+import 'AddGrammarScreen.dart';
+import 'GrammarExerciseScreen.dart';
+import 'GrammarListScreen.dart';
 
 class GrammarScreen extends StatelessWidget {
   const GrammarScreen({super.key});
@@ -26,21 +29,36 @@ class GrammarScreen extends StatelessWidget {
                 title: 'Danh sách ngữ pháp',
                 icon: LucideIcons.fileText,
                 color: const Color(0xFFFFE0B2), // Cam pastel
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_)=> GrammarListScreen())
+                  );
+                },
               ),
               const SizedBox(height: 12),
               _buildGrammarCard(
                 title: 'Thêm cấu trúc mới',
                 icon: LucideIcons.circlePlus,
                 color: const Color(0xFFE1BEE7), // Tím pastel
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_)=> AddGrammarScreen())
+                  );
+                },
               ),
               const SizedBox(height: 12),
               _buildGrammarCard(
                 title: 'Bài tập ngữ pháp',
                 icon: LucideIcons.locationEdit,
                 color: const Color(0xFFB3E5FC), // Xanh dương pastel
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_)=> GrammarExerciseScreen())
+                  );
+                },
               ),
             ],
           ),
