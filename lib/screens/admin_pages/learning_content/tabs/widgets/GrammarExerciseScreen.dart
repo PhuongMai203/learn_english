@@ -1,72 +1,88 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-class GrammarExerciseScreen extends StatelessWidget {
-  final List<Map<String, dynamic>> exercises = [
-    {
-      "question": "She ___ to school every day.",
-      "options": ["go", "goes", "going", "gone"],
-      "answer": "goes"
-    },
-    {
-      "question": "They ___ football yesterday.",
-      "options": ["play", "played", "playing", "plays"],
-      "answer": "played"
-    },
-  ];
+import '../../../../../components/app_background.dart';
+import 'exercise_form.dart';
+import 'exercise_list.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-  GrammarExerciseScreen({super.key});
+import 'grammar_from.dart';
+import 'grammar_list.dart';
+
+class GrammarExerciseScreen extends StatefulWidget {
+  const GrammarExerciseScreen({super.key});
+
+  @override
+  State<GrammarExerciseScreen> createState() =>
+      _GrammarExerciseScreenState();
+}
+
+class _GrammarExerciseScreenState extends State<GrammarExerciseScreen> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  List<Map<String, dynamic>> _courses = [];
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> _exercises = [];
+
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCourses();
+    _fetchExercises();
+  }
+
+  Future<void> _fetchCourses() async {
+    final snapshot = await _firestore.collection('courses').get();
+    setState(() {
+      _courses = snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    });
+  }
+
+  Future<void> _fetchExercises() async {
+    final snapshot = await _firestore.collection('grammar_exercises').get();
+    setState(() {
+      _exercises = snapshot.docs;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Bài tập Ngữ pháp"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.blue.shade800,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.add_circle_outline),
-            onPressed: () {
-              // TODO: Điều hướng sang màn hình thêm bài tập
-            },
-          )
-        ],
-      ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: exercises.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (context, i) {
-          final ex = exercises[i];
-          return Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.green.shade50,
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(ex["question"],
-                    style: const TextStyle(
-                        fontSize: 16, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 8),
-                ...ex["options"].map<Widget>((opt) {
-                  final isCorrect = opt == ex["answer"];
-                  return Row(
-                    children: [
-                      Icon(isCorrect ? Icons.check_circle : Icons.circle_outlined,
-                          color: isCorrect ? Colors.green : Colors.grey,
-                          size: 18),
-                      const SizedBox(width: 6),
-                      Text(opt),
-                    ],
-                  );
-                }).toList(),
-              ],
-            ),
-          );
-        },
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('Quản lý bài tập ngữ pháp'),
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.blue.shade800,
+          elevation: 2,
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(20),
+          child: ListView(
+            children: [
+              // Form thêm/chỉnh sửa bài tập
+              GrammarForm(
+                firestore: _firestore,
+                courses: _courses,
+                onSaved: _fetchExercises,
+              ),
+
+              const SizedBox(height: 24),
+              const Divider(thickness: 1),
+              const SizedBox(height: 12),
+              // Danh sách bài tập
+              GrammarList(
+                exercises: _exercises,
+                firestore: _firestore,
+                onUpdated: _fetchExercises,
+              )
+
+
+            ],
+          ),
+        ),
       ),
     );
   }

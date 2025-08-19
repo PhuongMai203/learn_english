@@ -37,7 +37,7 @@ class VocabularyScreen extends StatelessWidget {
               _buildVocabCard(
                 title: 'Thêm từ mới',
                 icon: LucideIcons.circlePlus,
-                color: const Color(0xFF74CCED), // Vàng pastel
+                color: const Color(0xFF7FCBEC), // Vàng pastel
                 onTap: () {
                   Navigator.push(context,
                   MaterialPageRoute(builder: (_)=> const AddVocabularyScreen()));
@@ -47,7 +47,7 @@ class VocabularyScreen extends StatelessWidget {
               _buildVocabCard(
                 title: 'Bài tập từ vựng',
                 icon: LucideIcons.bookOpenCheck,
-                color: const Color(0xFF1F99D1), // Tím pastel
+                color: const Color(0xFF5DC2FF), // Tím pastel
                 onTap: () {
                   Navigator.push(context,
                   MaterialPageRoute(builder: (_)=> const VocabularyExerciseScreen()));

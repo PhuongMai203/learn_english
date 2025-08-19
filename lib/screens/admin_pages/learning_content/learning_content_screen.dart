@@ -8,14 +8,17 @@ import 'tabs/lessons_tab.dart';
 import 'tabs/vocab_grammar_tab.dart';
 
 class LearningContentScreen extends StatelessWidget {
-  const LearningContentScreen({super.key});
+  final int initialIndex; // thêm tham số
+
+  const LearningContentScreen({super.key, this.initialIndex = 0});
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 4,
+      initialIndex: initialIndex, // set tab mặc định
       child: Scaffold(
-        backgroundColor: Colors.white, // Đặt màu nền trắng cho Scaffold
+        backgroundColor: Colors.white,
         appBar: AppBar(
           title: const Text(
             'Nội dung học',

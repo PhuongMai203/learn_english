@@ -6,6 +6,137 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class GrammarListScreen extends StatelessWidget {
   const GrammarListScreen({super.key});
 
+  void _editGrammar(BuildContext context, String docId, Map<String, dynamic> data) {
+    final titleController = TextEditingController(text: data["title"]);
+    final formulaController = TextEditingController(text: data["formula"]);
+    final usageController = TextEditingController(text: data["usage"]);
+    final exampleController = TextEditingController(text: data["example"]);
+
+    InputDecoration _inputDecoration(String label, IconData icon) {
+      return InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: Colors.blue.shade600),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      );
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          titlePadding: EdgeInsets.zero,
+          title: Container(
+            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade600,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.edit, color: Colors.white, size: 22),
+                const SizedBox(width: 8),
+                const Text(
+                  "Chỉnh sửa Ngữ pháp",
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                TextField(
+                  controller: titleController,
+                  decoration: _inputDecoration("Tiêu đề", Icons.title),
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: formulaController,
+                  decoration: _inputDecoration("Công thức", Icons.functions),
+                  maxLines: 2,
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: usageController,
+                  decoration: _inputDecoration("Cách dùng", Icons.lightbulb_outline),
+                  maxLines: 3,
+                ),
+                const SizedBox(height: 14),
+                TextField(
+                  controller: exampleController,
+                  decoration: _inputDecoration("Ví dụ", Icons.menu_book_outlined),
+                  maxLines: 2,
+                ),
+              ],
+            ),
+          ),
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          actionsAlignment: MainAxisAlignment.spaceBetween,
+          actions: [
+            OutlinedButton(
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.grey.shade700,
+                side: BorderSide(color: Colors.grey.shade400),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Hủy"),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                backgroundColor: Colors.blue.shade600,
+                foregroundColor: Colors.white,
+                textStyle: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              onPressed: () async {
+                await FirebaseFirestore.instance.collection("grammars").doc(docId).update({
+                  "title": titleController.text,
+                  "formula": formulaController.text,
+                  "usage": usageController.text,
+                  "example": exampleController.text,
+                  "createdAt": FieldValue.serverTimestamp(),
+                });
+                Navigator.pop(context);
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("✅ Đã lưu thay đổi"),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              child: const Text("Lưu"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppBackground(
@@ -55,65 +186,46 @@ class GrammarListScreen extends StatelessWidget {
                       )
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              data["title"] ?? "Không có tiêu đề",
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                      Expanded(
+                        child: Text(
+                          data["title"] ?? "Không có tiêu đề",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
                           ),
-                          Row(
-                            children: [
-                              IconButton(
-                                icon: const Icon(LucideIcons.pencil, color: Colors.blue),
-                                onPressed: () {
-                                  // TODO: viết màn hình edit ngữ pháp
-                                },
-                              ),
-                              IconButton(
-                                icon: const Icon(LucideIcons.trash, color: Colors.red),
-                                onPressed: () async {
-                                  await FirebaseFirestore.instance
-                                      .collection("grammars")
-                                      .doc(docId)
-                                      .delete();
-                                },
-                              ),
-                            ],
-                          )
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(LucideIcons.pencil, color: Colors.blue),
+                            onPressed: () {
+                              _editGrammar(context, docId, data);
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(LucideIcons.trash, color: Colors.red),
+                            onPressed: () async {
+                              await FirebaseFirestore.instance
+                                  .collection("grammars")
+                                  .doc(docId)
+                                  .delete();
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("🗑️ Đã xóa ngữ pháp"),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
-
-                      // phần dưới giữ nguyên
-                      // if (data["formula"] != null) ...[
-                      //   const SizedBox(height: 6),
-                      //   Text(
-                      //     data["formula"]!
-                      //         .replaceAll("(-)", "\n(-)")
-                      //         .replaceAll("(?)", "\n(?)"),
-                      //     style: const TextStyle(fontSize: 15),
-                      //   ),
-                      // ],
-                      //
-                      // if (data["usage"] != null) ...[
-                      //   const SizedBox(height: 6),
-                      //   Text("💡 Cách dùng: ${data["usage"]}"),
-                      // ],
-                      // if (data["example"] != null) ...[
-                      //   const SizedBox(height: 6),
-                      //   Text("✏️ Ví dụ: ${data["example"]}"),
-                      // ],
                     ],
                   ),
-
                 );
               },
             );

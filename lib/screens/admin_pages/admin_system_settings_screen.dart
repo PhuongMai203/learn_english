@@ -1,11 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../../components/app_background.dart';
+import '../../../components/app_background.dart';
+import '../user_pages/settings/score_management_screen.dart';
+import '../user_pages/settings/system_update_screen.dart';
 import '../welcome_screen.dart';
+import 'widgets/AdminStatisticsScreen.dart';
+import 'widgets/PromotionMarketingScreen.dart'; // ✅ Thêm import
 
-class SystemSettingsScreen extends StatelessWidget {
-  const SystemSettingsScreen({super.key});
+class AdminSystemSettingsScreen extends StatelessWidget {
+  const AdminSystemSettingsScreen({super.key});
 
   void _signOut(BuildContext context) async {
     try {
@@ -29,7 +33,7 @@ class SystemSettingsScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text(
-            'Cài đặt hệ thống',
+            'Cài đặt hệ thống (Admin)',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -48,51 +52,63 @@ class SystemSettingsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildSectionTitle('Tuỳ chọn chung'),
-              _buildSettingTile(
-                icon: Icons.language,
-                title: 'Ngôn ngữ',
-                subtitle: 'Thay đổi ngôn ngữ ứng dụng',
-                onTap: () {},
-              ),
-              _buildSettingTile(
-                icon: Icons.notifications_active,
-                title: 'Thông báo',
-                subtitle: 'Cài đặt thông báo hệ thống',
-                onTap: () {},
-              ),
-              _buildSettingTile(
-                icon: Icons.privacy_tip_outlined,
-                title: 'Chính sách & Quyền riêng tư',
-                subtitle: 'Quản lý điều khoản và chính sách',
-                onTap: () {},
-              ),
-              const SizedBox(height: 24),
-              _buildSectionTitle('Quản lý hệ thống'),
-              _buildSettingTile(
-                icon: Icons.category,
-                title: 'Danh mục học tập',
-                subtitle: 'Quản lý các danh mục từ vựng, ngữ pháp',
-                onTap: () {},
-              ),
+              _buildSectionTitle('Quản lý nội dung'),
               _buildSettingTile(
                 icon: Icons.scoreboard,
                 title: 'Quản lý điểm số',
                 subtitle: 'Tuỳ chỉnh hệ thống tính điểm',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const ScoreManagementScreen()),
+                  );
+                },
+              ),
+              _buildSettingTile(
+                icon: Icons.campaign,
+                title: 'Khuyến mãi & Tiếp thị',
+                subtitle: 'Tạo và quản lý chiến dịch marketing',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const PromotionMarketingScreen()),
+                  );
+                },
+              ),
+              const SizedBox(height: 24),
+              _buildSectionTitle('Thống kê & Hệ thống'),
+              _buildSettingTile(
+                icon: Icons.bar_chart,
+                title: 'Báo cáo & Thống kê',
+                subtitle: 'Xem tổng quan người dùng, tiến độ học tập',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const AdminStatisticsScreen()),
+                  );
+                },
               ),
               _buildSettingTile(
                 icon: Icons.system_update_alt,
                 title: 'Cập nhật hệ thống',
                 subtitle: 'Kiểm tra và cập nhật phiên bản mới',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const SystemUpdateScreen()),
+                  );
+                },
               ),
               const SizedBox(height: 24),
               _buildSectionTitle('Tài khoản'),
               _buildSettingTile(
                 icon: Icons.logout,
                 title: 'Đăng xuất',
-                subtitle: 'Thoát khỏi tài khoản hiện tại',
+                subtitle: 'Thoát khỏi tài khoản admin',
                 onTap: () => _signOut(context),
               ),
             ],
@@ -127,7 +143,8 @@ class SystemSettingsScreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(vertical: 8),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+        contentPadding:
+        const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         leading: CircleAvatar(
           backgroundColor: Colors.indigo.shade100,
           child: Icon(icon, color: Colors.indigo),

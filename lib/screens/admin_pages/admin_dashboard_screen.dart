@@ -1,8 +1,13 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../components/app_background.dart';
+import 'learning_content/learning_content_screen.dart';
+import 'learning_content/tabs/lessons_tab.dart';
 import 'user_management_screen.dart';
+import 'widgets/AnalyticsScreen.dart';
+import 'widgets/MessagingScreen.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -23,10 +28,6 @@ class AdminDashboardScreen extends StatelessWidget {
           actions: [
             IconButton(
               icon: const Icon(Icons.notifications, color: Colors.deepPurple),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: const Icon(Icons.account_circle, color: Colors.deepPurple),
               onPressed: () {},
             ),
           ],
@@ -92,14 +93,44 @@ class AdminDashboardScreen extends StatelessWidget {
       child: ListView(
         scrollDirection: Axis.horizontal,
         children: [
-          _buildStatCard(Iconsax.people, 'Người dùng', '2,458', Colors.blue, '+124 mới'),
-          _buildStatCard(Iconsax.book, 'Khóa học', '36', Colors.green, '+3 mới'),
+          // Đếm users
+          FutureBuilder<QuerySnapshot>(
+            future: FirebaseFirestore.instance.collection('users').get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return _buildStatCard(Iconsax.people, 'Người dùng', '...', Colors.blue, '');
+              }
+              if (snapshot.hasError) {
+                return _buildStatCard(Iconsax.people, 'Người dùng', 'Lỗi', Colors.red, '');
+              }
+              final count = snapshot.data?.docs.length ?? 0;
+              return _buildStatCard(Iconsax.people, 'Người dùng', '$count', Colors.blue, '');
+            },
+          ),
+
+          // Đếm courses
+          FutureBuilder<QuerySnapshot>(
+            future: FirebaseFirestore.instance.collection('courses').get(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return _buildStatCard(Iconsax.book, 'Khóa học', '...', Colors.green, '');
+              }
+              if (snapshot.hasError) {
+                return _buildStatCard(Iconsax.book, 'Khóa học', 'Lỗi', Colors.red, '');
+              }
+              final count = snapshot.data?.docs.length ?? 0;
+              return _buildStatCard(Iconsax.book, 'Khóa học', '$count', Colors.green, '');
+            },
+          ),
+
+          // Các mục còn lại tạm để cứng như trước
           _buildStatCard(Iconsax.video, 'Bài học', '428', Colors.orange, '+15 mới'),
           _buildStatCard(Iconsax.chart, 'Hoàn thành', '87%', Colors.purple, '+5%'),
         ],
       ),
     );
   }
+
 
   Widget _buildStatCard(IconData icon, String title, String value, Color color, String growth) {
     return Container(
@@ -170,13 +201,38 @@ class AdminDashboardScreen extends StatelessWidget {
               );
             }),
 
-            _buildDashboardCard(Iconsax.book, 'Khóa học', Colors.green, () {}),
-            _buildDashboardCard(Iconsax.video_play, 'Bài học', Colors.orange, () {}),
-            _buildDashboardCard(Iconsax.document, 'Tài liệu', Colors.purple, () {}),
-            _buildDashboardCard(Iconsax.chart_2, 'Phân tích', Colors.red, () {}),
-            _buildDashboardCard(Iconsax.message, 'Hỗ trợ', Colors.teal, () {}),
-            _buildDashboardCard(Iconsax.setting, 'Cài đặt', Colors.indigo, () {}),
-            _buildDashboardCard(Iconsax.calendar, 'Lịch biểu', Colors.pink, () {}),
+            _buildDashboardCard(Iconsax.book, 'Khóa học', Colors.green, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const LearningContentScreen()),
+              );
+            }),
+            _buildDashboardCard(
+              Iconsax.video_play,
+              'Bài học',
+              Colors.orange,
+                  () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const LearningContentScreen(initialIndex: 1),
+                  ),
+                );
+              },
+            ),
+            _buildDashboardCard(Iconsax.chart_2, 'Phân tích', Colors.red, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AnalyticsScreen()),
+              );
+            }),
+            _buildDashboardCard(Iconsax.message, 'Nhắn tin', Colors.teal, () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MessagingScreen()),
+              );
+            }),
+
           ],
         ),
       ],

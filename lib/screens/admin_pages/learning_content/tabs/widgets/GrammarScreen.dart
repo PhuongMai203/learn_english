@@ -28,7 +28,7 @@ class GrammarScreen extends StatelessWidget {
               _buildGrammarCard(
                 title: 'Danh sách ngữ pháp',
                 icon: LucideIcons.fileText,
-                color: const Color(0xFFFFE0B2), // Cam pastel
+                color: const Color(0xFFB3E5FC), // Cam pastel
                 onTap: () {
                   Navigator.push(
                     context,
@@ -40,7 +40,7 @@ class GrammarScreen extends StatelessWidget {
               _buildGrammarCard(
                 title: 'Thêm cấu trúc mới',
                 icon: LucideIcons.circlePlus,
-                color: const Color(0xFFE1BEE7), // Tím pastel
+                color: const Color(0xFF96D5F3), // Tím pastel
                 onTap: () {
                   Navigator.push(
                       context,
@@ -52,13 +52,16 @@ class GrammarScreen extends StatelessWidget {
               _buildGrammarCard(
                 title: 'Bài tập ngữ pháp',
                 icon: LucideIcons.locationEdit,
-                color: const Color(0xFFB3E5FC), // Xanh dương pastel
+                color: const Color(0xFF94D7F6), // Xanh dương pastel
                 onTap: () {
                   Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_)=> GrammarExerciseScreen())
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => GrammarExerciseScreen(),
+                    ),
                   );
                 },
+
               ),
             ],
           ),

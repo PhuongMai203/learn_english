@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'admin_dashboard_screen.dart';
+import 'admin_system_settings_screen.dart';
 import 'learning_content/learning_content_screen.dart';
 import 'user_management_screen.dart';
-import 'utilities_screen.dart';
-import 'system_settings_screen.dart';
 
 class AdminNavbar extends StatefulWidget {
   const AdminNavbar({super.key});
@@ -19,15 +18,14 @@ class _AdminNavbarState extends State<AdminNavbar> {
     const AdminDashboardScreen(),
     LearningContentScreen(),
     const UserManagementScreen(),
-    UtilitiesScreen(),
-    const SystemSettingsScreen(),
+
+    const AdminSystemSettingsScreen(),
   ];
 
   final List<String> _titles = [
     'Dashboard',
     'Nội dung học',
     'Người dùng',
-    'Tiện ích',
     'Cài đặt',
   ];
 
@@ -56,10 +54,6 @@ class _AdminNavbarState extends State<AdminNavbar> {
           BottomNavigationBarItem(
             icon: Icon(Icons.people),
             label: 'Người dùng',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.extension),
-            label: 'Tiện ích',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),
