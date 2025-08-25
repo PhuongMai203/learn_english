@@ -6,6 +6,7 @@ import 'tabs/courses_tab.dart';
 import 'tabs/exercises_tab.dart';
 import 'tabs/lessons_tab.dart';
 import 'tabs/vocab_grammar_tab.dart';
+import '../testadmin/tests_tab.dart';
 
 class LearningContentScreen extends StatelessWidget {
   final int initialIndex; // thêm tham số
@@ -15,7 +16,7 @@ class LearningContentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 5,
       initialIndex: initialIndex, // set tab mặc định
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -32,13 +33,15 @@ class LearningContentScreen extends StatelessWidget {
           elevation: 5,
           bottom: const LearningTabBar(),
         ),
-        body: const AppBackground(
+        body: AppBackground(
           child: TabBarView(
             children: [
-              CoursesTab(),
-              LessonListScreen(),
-              ExercisesTab(),
-              VocabGrammarTab(),
+              const CoursesTab(),
+              const LessonListScreen(),
+              const ExercisesTab(),
+              const VocabGrammarTab(),
+              AdminTestsScreen(),
+
             ],
           ),
         ),

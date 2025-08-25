@@ -36,6 +36,7 @@ class LearningTabBar extends StatelessWidget implements PreferredSizeWidget {
           Tab(text: 'Bài học'),
           Tab(text: 'Bài tập'),
           Tab(text: 'Từ vựng & Ngữ pháp'),
+          Tab(text: "Bài kiểm tra"),
         ],
       ),
     );
