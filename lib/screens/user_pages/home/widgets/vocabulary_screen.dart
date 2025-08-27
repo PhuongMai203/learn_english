@@ -1,0 +1,72 @@
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:learn_english/components/app_background.dart';
+
+class VocabularyScreen extends StatelessWidget {
+  const VocabularyScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text("Từ vựng"),
+          backgroundColor: const Color(0xFF5BC0F8),
+          elevation: 0,
+        ),
+        body: StreamBuilder<QuerySnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection('vocabulary')
+              .orderBy('createdAt', descending: true) // sắp xếp mới nhất
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text("Chưa có từ vựng nào"));
+            }
+
+            final docs = snapshot.data!.docs;
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: docs.length,
+              itemBuilder: (context, index) {
+                final data = docs[index].data() as Map<String, dynamic>;
+
+                final word = data['word'] ?? '';
+                final meaning = data['meaning'] ?? '';
+                final pronunciation = data['pronunciation'] ?? '';
+                final type = data['type'] ?? '';
+
+                return _buildWordCard(word, meaning, pronunciation, type);
+              },
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWordCard(
+      String word, String meaning, String phonetic, String type) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      child: ListTile(
+        leading: CircleAvatar(
+          backgroundColor: const Color(0xFF5BC0F8).withOpacity(0.2),
+          child: const Icon(Icons.translate, color: Color(0xFF5BC0F8)),
+        ),
+        title: Text(
+          word,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        subtitle: Text("$meaning • $type\n[$phonetic]"),
+      ),
+    );
+  }
+}

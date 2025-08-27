@@ -15,7 +15,8 @@ class QuestionForm extends StatefulWidget {
   State<QuestionForm> createState() => _QuestionFormState();
 }
 
-class _QuestionFormState extends State<QuestionForm> {
+class _QuestionFormState extends State<QuestionForm>
+    with SingleTickerProviderStateMixin {
   late TextEditingController _contentController;
   late List<TextEditingController> _optionControllers;
   int _correctAnswerIndex = 0;
@@ -57,19 +58,20 @@ class _QuestionFormState extends State<QuestionForm> {
 
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
-      prefixIcon: Icon(icon, color: Colors.blue.shade600),
+      prefixIcon: Icon(icon, color: Colors.indigo.shade400),
       labelText: label,
-      labelStyle: TextStyle(color: Colors.blue.shade700, fontWeight: FontWeight.w500),
+      labelStyle: TextStyle(
+          color: Colors.indigo.shade600, fontWeight: FontWeight.w600),
       filled: true,
-      fillColor: Colors.blue.shade50,
+      fillColor: Colors.indigo.shade50,
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(18),
         borderSide: BorderSide.none,
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.blue.shade600, width: 2),
+        borderRadius: BorderRadius.circular(18),
+        borderSide: BorderSide(color: Colors.indigo.shade400, width: 2),
       ),
     );
   }
@@ -77,22 +79,24 @@ class _QuestionFormState extends State<QuestionForm> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
       insetPadding: const EdgeInsets.all(20),
-      child: Container(
-        padding: const EdgeInsets.all(20),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+        padding: const EdgeInsets.all(22),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [Colors.blue.shade50, Colors.white],
+            colors: [Colors.indigo.shade50, Colors.white],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -103,26 +107,30 @@ class _QuestionFormState extends State<QuestionForm> {
             Row(
               children: [
                 CircleAvatar(
-                  backgroundColor: Colors.blue.shade100,
-                  child: Icon(Icons.edit, color: Colors.blue.shade700),
+                  radius: 22,
+                  backgroundColor: Colors.indigo.shade100,
+                  child: Icon(Icons.edit, color: Colors.indigo.shade600),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 Text(
                   widget.question == null ? "Thêm câu hỏi" : "Sửa câu hỏi",
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade700,
+                    color: Colors.indigo.shade700,
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 14),
+            Divider(color: Colors.indigo.shade100, thickness: 1),
             const SizedBox(height: 18),
 
             // --- Input fields ---
             TextField(
               controller: _contentController,
-              decoration: _inputDecoration("Nội dung câu hỏi", Icons.help_outline),
+              decoration:
+              _inputDecoration("Nội dung câu hỏi", Icons.help_outline),
             ),
             const SizedBox(height: 14),
             ...List.generate(4, (i) {
@@ -130,14 +138,16 @@ class _QuestionFormState extends State<QuestionForm> {
                 padding: const EdgeInsets.only(bottom: 12),
                 child: TextField(
                   controller: _optionControllers[i],
-                  decoration: _inputDecoration("Đáp án ${i + 1}", Icons.circle_outlined),
+                  decoration: _inputDecoration(
+                      "Đáp án ${i + 1}", Icons.circle_outlined),
                 ),
               );
             }),
 
             DropdownButtonFormField<int>(
               value: _correctAnswerIndex,
-              decoration: _inputDecoration("Chọn đáp án đúng", Icons.check_circle_outline),
+              decoration: _inputDecoration(
+                  "Chọn đáp án đúng", Icons.check_circle_outline),
               items: List.generate(4, (i) {
                 return DropdownMenuItem(
                   value: i,
@@ -150,28 +160,37 @@ class _QuestionFormState extends State<QuestionForm> {
                 }
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 22),
 
             // --- Action buttons ---
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                TextButton(
+                OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14)),
+                    side: BorderSide(color: Colors.indigo.shade300),
+                  ),
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text("Hủy", style: TextStyle(color: Colors.grey)),
+                  child: Text("Hủy",
+                      style: TextStyle(color: Colors.indigo.shade500)),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                    backgroundColor: Colors.blue.shade600,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 26, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    backgroundColor: Colors.indigo.shade500,
                     foregroundColor: Colors.white,
-                    shadowColor: Colors.blue.shade200,
-                    elevation: 4,
+                    shadowColor: Colors.indigo.shade200,
+                    elevation: 6,
                   ),
                   onPressed: _submit,
-                  child: const Text("Lưu", style: TextStyle(fontWeight: FontWeight.w600)),
+                  child: const Text("Lưu",
+                      style: TextStyle(fontWeight: FontWeight.w600)),
                 ),
               ],
             )

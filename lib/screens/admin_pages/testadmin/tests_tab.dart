@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:learn_english/components/app_background.dart';
 import 'package:learn_english/screens/admin_pages/testadmin/widgets/models.dart';
 
 import 'widgets/question_card.dart';
@@ -13,10 +14,29 @@ class AdminTestsScreen extends StatefulWidget {
 }
 
 class _AdminTestsScreenState extends State<AdminTestsScreen> {
-  final List<Test> _tests = [];
   final _firestore = FirebaseFirestore.instance;
 
-  // --- Lưu Test lên Firestore ---
+  Test _fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+
+    return Test(
+      id: data["id"] ?? doc.id,
+      title: data["title"] ?? "",
+      description: data["description"] ?? "",
+      duration: (data["duration"] ?? 0) as int,
+      isActive: data["isActive"] ?? true,
+      createdDate: DateTime.tryParse(data["createdDate"] ?? "") ?? DateTime.now(),
+      questions: (data["questions"] as List<dynamic>? ?? []).map((q) {
+        return Question(
+          id: q["id"] ?? "",
+          content: q["content"] ?? "",
+          options: List<String>.from(q["options"] ?? []),
+          correctAnswerIndex: q["correctAnswerIndex"] ?? 0,
+        );
+      }).toList(),
+    );
+  }
+
   Future<void> _saveTestToFirestore(Test test) async {
     await _firestore.collection("tests").doc(test.id).set({
       "id": test.id,
@@ -38,7 +58,6 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
     await _firestore.collection("tests").doc(testId).delete();
   }
 
-  // --- methods để add/edit/delete test ---
   void _addTest() {
     final newTest = Test(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -49,12 +68,10 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
       createdDate: DateTime.now(),
       questions: [],
     );
-    setState(() => _tests.add(newTest));
     _saveTestToFirestore(newTest);
   }
 
   void _editTest(Test test) {
-    // ví dụ sửa title
     setState(() {
       test.title = "${test.title} (đã sửa)";
     });
@@ -62,11 +79,9 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
   }
 
   void _deleteTest(Test test) {
-    setState(() => _tests.remove(test));
     _deleteTestFromFirestore(test.id);
   }
 
-  // --- methods để add/edit/delete question ---
   void _addQuestion(Test test) {
     showDialog(
       context: context,
@@ -100,44 +115,135 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
     _saveTestToFirestore(test);
   }
 
-  // --- UI ---
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Quản lý Bài kiểm tra")),
-      body: ListView.builder(
-        itemCount: _tests.length,
-        itemBuilder: (ctx, i) {
-          final test = _tests[i];
-          return ExpansionTile(
-            title: Text(test.title),
-            subtitle: Text("Số câu hỏi: ${test.questionCount}"),
-            children: [
-              for (var q in test.questions)
-                QuestionCard(
-                  question: q,
-                  onEdit: () => _editQuestion(test, q),
-                  onDelete: () => _deleteQuestion(test, q),
-                ),
-              TextButton.icon(
-                onPressed: () => _addQuestion(test),
-                icon: const Icon(Icons.add),
-                label: const Text("Thêm câu hỏi"),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  IconButton(onPressed: () => _editTest(test), icon: const Icon(Icons.edit)),
-                  IconButton(onPressed: () => _deleteTest(test), icon: const Icon(Icons.delete)),
-                ],
-              )
-            ],
-          );
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addTest,
-        child: const Icon(Icons.add),
+    return AppBackground(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        body: StreamBuilder<QuerySnapshot>(
+          stream: _firestore.collection("tests").snapshots(),
+          builder: (ctx, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+              return const Center(child: Text("Chưa có bài kiểm tra nào"));
+            }
+
+            final tests = snapshot.data!.docs.map(_fromFirestore).toList();
+            tests.sort((a, b) => b.createdDate.compareTo(a.createdDate));
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: tests.length,
+              itemBuilder: (ctx, i) {
+                final test = tests[i];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  elevation: 5,
+                  child: ExpansionTile(
+                    tilePadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    childrenPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.indigo.shade100,
+                      child: Icon(Icons.assignment,
+                          color: Colors.indigo.shade600),
+                    ),
+                    title: Text(
+                      test.title,
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.indigo.shade700),
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(test.description,
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.black54)),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: test.isActive
+                                    ? Colors.green.shade100
+                                    : Colors.red.shade100,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                test.isActive ? "Active" : "Inactive",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: test.isActive
+                                      ? Colors.green.shade800
+                                      : Colors.red.shade800,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text("Câu hỏi: ${test.questionCount}",
+                                style: const TextStyle(fontSize: 12)),
+                          ],
+                        ),
+                      ],
+                    ),
+                    children: [
+                      for (var q in test.questions)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: QuestionCard(
+                            question: q,
+                            onEdit: () => _editQuestion(test, q),
+                            onDelete: () => _deleteQuestion(test, q),
+                          ),
+                        ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.indigo.shade600,
+                          ),
+                          onPressed: () => _addQuestion(test),
+                          icon: const Icon(Icons.add),
+                          label: const Text("Thêm câu hỏi"),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            onPressed: () => _editTest(test),
+                            icon: const Icon(Icons.edit, color: Colors.indigo),
+                          ),
+                          IconButton(
+                            onPressed: () => _deleteTest(test),
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        ),
+        floatingActionButton: FloatingActionButton.extended(
+          onPressed: _addTest,
+          icon: const Icon(Icons.add),
+          label: const Text("Thêm bài kiểm tra"),
+          backgroundColor: Colors.indigo.shade600,
+        ),
       ),
     );
   }

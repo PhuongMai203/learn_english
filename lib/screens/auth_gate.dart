@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../components/main_navigation.dart';
 import 'admin_pages/admin_navbar.dart';
-import 'welcome_screen.dart';
+import 'user_pages/welcome_screen.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});

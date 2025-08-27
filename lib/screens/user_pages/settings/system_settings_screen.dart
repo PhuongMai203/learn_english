@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../components/app_background.dart';
-import '../../welcome_screen.dart';
+import '../welcome_screen.dart';
 import 'learning_categories_screen.dart';
 import 'notifications_settings_screen.dart';
 import 'privacy_policy_screen.dart';

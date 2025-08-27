@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../components/app_background.dart';
+import 'package:learn_english/screens/user_pages/home/widgets/grammar_screen.dart';
+import 'package:learn_english/screens/user_pages/home/widgets/vocabulary_screen.dart';
+import '../../../components/app_background.dart';
+import 'widgets/exercise_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -29,7 +32,7 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _buildLearningPath(),
               const SizedBox(height: 16),
-              _buildQuickAccess(),
+              _buildQuickAccess(context),
               const SizedBox(height: 16),
               _buildNotifications(),
               const SizedBox(height: 16),
@@ -79,7 +82,7 @@ class HomeScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue[50]!, Colors.purple[50]!],
+              colors: [Colors.blue, Colors.purple].map((c) => c.withOpacity(0.1)).toList(),
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -142,7 +145,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickAccess() {
+  Widget _buildQuickAccess(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -150,11 +153,37 @@ class HomeScreen extends StatelessWidget {
         const SizedBox(height: 12),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: const [
-            _QuickAccessIcon(icon: Icons.school, label: 'Từ vựng'),
-            _QuickAccessIcon(icon: Icons.menu_book, label: 'Ngữ pháp'),
-            _QuickAccessIcon(icon: Icons.speaker, label: 'Phát âm'),
-            _QuickAccessIcon(icon: Icons.assignment, label: 'Bài tập'),
+          children: [
+            _QuickAccessIcon(
+              icon: Icons.school,
+              label: 'Từ vựng',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const VocabularyScreen()),
+                );
+              },
+            ),
+            _QuickAccessIcon(
+              icon: Icons.menu_book,
+              label: 'Ngữ pháp',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const GrammarScreen()),
+                );
+              },
+            ),
+            _QuickAccessIcon(
+              icon: Icons.assignment,
+              label: 'Bài tập',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ExerciseScreen()),
+                );
+              },
+            ),
           ],
         ),
       ],
@@ -207,7 +236,7 @@ class HomeScreen extends StatelessWidget {
             const Text("Chuỗi học: 5 ngày liên tiếp 🎯"),
             const SizedBox(height: 8),
             LinearProgressIndicator(
-              value: 5/7,
+              value: 5 / 7,
               backgroundColor: Colors.grey[300],
               color: Colors.green,
               minHeight: 6,
@@ -250,7 +279,8 @@ class HomeScreen extends StatelessWidget {
           context: context,
           builder: (context) => AlertDialog(
             title: const Text("Lời động viên 💪"),
-            content: const Text("Hãy cùng cố gắng học tập mỗi ngày bạn nhé! Mỗi bước nhỏ đều đưa bạn đến gần hơn với mục tiêu thành thạo tiếng Anh."),
+            content: const Text(
+                "Hãy cùng cố gắng học tập mỗi ngày bạn nhé! Mỗi bước nhỏ đều đưa bạn đến gần hơn với mục tiêu thành thạo tiếng Anh."),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
@@ -321,11 +351,12 @@ class HomeScreen extends StatelessWidget {
         children: [
           Icon(icon, color: Colors.deepPurple, size: 28),
           const SizedBox(height: 8),
-          Text(value, style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.deepPurple,
-          )),
+          Text(value,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepPurple,
+              )),
           const SizedBox(height: 4),
           Text(label, style: const TextStyle(fontSize: 12)),
         ],
@@ -337,32 +368,41 @@ class HomeScreen extends StatelessWidget {
 class _QuickAccessIcon extends StatelessWidget {
   final IconData icon;
   final String label;
+  final VoidCallback onTap;
 
-  const _QuickAccessIcon({required this.icon, required this.label});
+  const _QuickAccessIcon({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: Colors.deepPurple[50],
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.deepPurple.withOpacity(0.1),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
-            ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.deepPurple[50],
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.deepPurple.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: Colors.deepPurple, size: 28),
           ),
-          child: Icon(icon, color: Colors.deepPurple, size: 28),
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-      ],
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+        ],
+      ),
     );
   }
 }

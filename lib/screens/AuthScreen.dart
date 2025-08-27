@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:top_snackbar_flutter/custom_snack_bar.dart';
 import 'package:top_snackbar_flutter/top_snack_bar.dart';
-import 'package:learn_english/screens/user_pages/home_screen.dart';
 
 import 'auth/auth_tab_selector.dart';
 import 'auth/login_screen.dart';
 import 'auth/register_screen.dart';
 import 'auth/social_login_buttons.dart';
 import 'auth_gate.dart';
-import 'welcome_screen.dart';
+import 'user_pages/welcome_screen.dart';
 
 
 class AuthScreen extends StatefulWidget {

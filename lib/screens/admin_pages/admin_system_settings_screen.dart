@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import '../../../components/app_background.dart';
 import '../user_pages/settings/score_management_screen.dart';
 import '../user_pages/settings/system_update_screen.dart';
-import '../welcome_screen.dart';
+import '../user_pages/welcome_screen.dart';
 import 'widgets/AdminStatisticsScreen.dart';
 import 'widgets/PromotionMarketingScreen.dart'; // ✅ Thêm import
 
