@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ExerciseForm extends StatefulWidget {
   final FirebaseFirestore firestore;
   final List<Map<String, dynamic>> courses;
+  final List<Map<String, dynamic>> vocabularies;
   final VoidCallback onSaved;
 
   const ExerciseForm({
@@ -11,6 +12,7 @@ class ExerciseForm extends StatefulWidget {
     required this.firestore,
     required this.courses,
     required this.onSaved,
+    required this.vocabularies,
   });
 
   @override
@@ -19,9 +21,8 @@ class ExerciseForm extends StatefulWidget {
 
 class _ExerciseFormState extends State<ExerciseForm> {
   final _formKey = GlobalKey<FormState>();
-  final _titleController = TextEditingController();
-  final _wordsController = TextEditingController();
 
+  final _questionController = TextEditingController();
   final _optionAController = TextEditingController();
   final _optionBController = TextEditingController();
   final _optionCController = TextEditingController();
@@ -30,6 +31,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
   String? _correctAnswer;
   String? _selectedCourseId;
   String? _selectedLessonId;
+  String? _selectedVocabularyId;
+
   List<Map<String, dynamic>> _lessons = [];
 
   Future<void> _fetchLessons(String courseId) async {
@@ -50,6 +53,11 @@ class _ExerciseFormState extends State<ExerciseForm> {
   Future<void> _saveExercise({String? docId}) async {
     if (!_formKey.currentState!.validate()) return;
 
+    final selectedVocab = widget.vocabularies.firstWhere(
+          (v) => v['id'] == _selectedVocabularyId,
+      orElse: () => {},
+    );
+
     final options = {
       'A': _optionAController.text.trim(),
       'B': _optionBController.text.trim(),
@@ -58,10 +66,11 @@ class _ExerciseFormState extends State<ExerciseForm> {
     };
 
     final data = {
-      'title': _titleController.text.trim(),
+      'title': selectedVocab['word'] ?? 'Không có tên',
       'courseId': _selectedCourseId,
       'lessonId': _selectedLessonId,
-      'words': _wordsController.text.split(',').map((e) => e.trim()).toList(),
+      'vocabularyId': _selectedVocabularyId,
+      'words': [_questionController.text.trim()], // 🔥 thêm câu hỏi
       'options': options,
       'correctAnswer': _correctAnswer,
       'createdAt': FieldValue.serverTimestamp(),
@@ -69,27 +78,32 @@ class _ExerciseFormState extends State<ExerciseForm> {
 
     try {
       if (docId != null) {
-        await widget.firestore.collection('vocabulary_exercises').doc(docId).update(data);
+        await widget.firestore
+            .collection('vocabulary_exercises')
+            .doc(docId)
+            .update(data);
       } else {
         await widget.firestore.collection('vocabulary_exercises').add(data);
       }
 
       // Reset form
-      _titleController.clear();
-      _wordsController.clear();
+      _selectedCourseId = null;
+      _selectedLessonId = null;
+      _selectedVocabularyId = null;
+      _lessons = [];
+      _questionController.clear();
       _optionAController.clear();
       _optionBController.clear();
       _optionCController.clear();
       _optionDController.clear();
       _correctAnswer = null;
-      _selectedCourseId = null;
-      _selectedLessonId = null;
-      _lessons = [];
+
       widget.onSaved();
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(docId != null ? 'Cập nhật thành công' : 'Thêm bài tập thành công'),
+          content:
+          Text(docId != null ? 'Cập nhật thành công' : 'Thêm bài tập thành công'),
           backgroundColor: Colors.green,
         ),
       );
@@ -123,13 +137,42 @@ class _ExerciseFormState extends State<ExerciseForm> {
           children: [
             const SizedBox(height: 16),
 
-            // Tên bài tập
-            TextFormField(
-              controller: _titleController,
-              decoration: _inputDecoration('Tên bài tập', Icons.title),
-              validator: (v) => v!.isEmpty ? 'Vui lòng nhập tên bài tập' : null,
+            // Gợi ý từ vựng làm tên bài tập
+            Text('Tên bài tập (theo từ vựng)', style: _labelStyle()),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<String>(
+              value: _selectedVocabularyId,
+              isExpanded: true,
+              decoration: _inputDecoration('', Icons.text_fields).copyWith(
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 12,
+                ),
+              ),
+              items: widget.vocabularies.map((vocab) {
+                return DropdownMenuItem<String>(
+                  value: vocab['id'] as String,
+                  child: Text(
+                    vocab['word']?.toString() ?? "Không có từ",
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                );
+              }).toList(),
+              onChanged: (v) => setState(() => _selectedVocabularyId = v),
+              validator: (v) => v == null ? "Vui lòng chọn từ vựng" : null,
             ),
             const SizedBox(height: 16),
+
+            // Nhập câu hỏi
+            Text('Câu hỏi', style: _labelStyle()),
+            const SizedBox(height: 8),
+            TextFormField(
+              controller: _questionController,
+              decoration: _inputDecoration('Nhập câu hỏi', Icons.help_outline),
+              validator: (v) => v!.isEmpty ? 'Vui lòng nhập câu hỏi' : null,
+            ),
+            const SizedBox(height: 20),
 
             // Course and lesson selection
             Row(
@@ -157,20 +200,6 @@ class _ExerciseFormState extends State<ExerciseForm> {
                   ),
                 ),
               ],
-            ),
-            const SizedBox(height: 20),
-
-            // Vocabulary section
-            _buildSectionHeader('Từ vựng'),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _wordsController,
-              decoration: _inputDecoration(
-                'Từ vựng (cách nhau bằng dấu ,)',
-                Icons.text_fields,
-              ),
-              maxLines: 2,
-              validator: (v) => v!.isEmpty ? 'Vui lòng nhập từ vựng' : null,
             ),
             const SizedBox(height: 20),
 
@@ -225,13 +254,13 @@ class _ExerciseFormState extends State<ExerciseForm> {
 
   InputDecoration _inputDecoration(String label, IconData icon) {
     return InputDecoration(
-      labelText: label,
+      labelText: label.isNotEmpty ? label : null,
       prefixIcon: Icon(icon, color: Colors.blue.shade700),
       filled: true,
       fillColor: Colors.grey.shade100,
       contentPadding: const EdgeInsets.symmetric(
-        vertical: 14,
-        horizontal: 16,
+        vertical: 12,
+        horizontal: 12,
       ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
@@ -239,16 +268,19 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-
   Widget _buildCourseDropdown() {
     return DropdownButtonFormField<String>(
       value: _selectedCourseId,
       isExpanded: true,
       decoration: _inputDecoration('', Icons.school),
       items: widget.courses
-          .map((c) => DropdownMenuItem(
+          .map((c) => DropdownMenuItem<String>(
         value: c['id'] as String,
-        child: Text(c['title'] ?? 'No title'),
+        child: Text(
+          c['title'] ?? 'No title',
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
       ))
           .toList(),
       onChanged: _onCourseChanged,
@@ -262,9 +294,13 @@ class _ExerciseFormState extends State<ExerciseForm> {
       isExpanded: true,
       decoration: _inputDecoration('', Icons.menu_book),
       items: _lessons
-          .map((l) => DropdownMenuItem(
+          .map((l) => DropdownMenuItem<String>(
         value: l['id'] as String,
-        child: Text(l['title'] ?? 'No title'),
+        child: Text(
+          l['title'] ?? 'No title',
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
+        ),
       ))
           .toList(),
       onChanged: (v) => setState(() => _selectedLessonId = v),
@@ -289,7 +325,8 @@ class _ExerciseFormState extends State<ExerciseForm> {
     );
   }
 
-  Widget _buildOptionField(String label, TextEditingController controller, Color color) {
+  Widget _buildOptionField(
+      String label, TextEditingController controller, Color color) {
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
@@ -381,8 +418,7 @@ class _ExerciseFormState extends State<ExerciseForm> {
         padding: const EdgeInsets.symmetric(vertical: 18),
         backgroundColor: Colors.blue.shade700,
         foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         elevation: 3,
         shadowColor: Colors.blue.shade200,
       ),

@@ -17,12 +17,14 @@ class _VocabularyExerciseScreenState extends State<VocabularyExerciseScreen> {
 
   List<Map<String, dynamic>> _courses = [];
   List<Map<String, dynamic>> _exercises = [];
+  List<Map<String, dynamic>> _vocabularies = [];
 
   @override
   void initState() {
     super.initState();
     _fetchCourses();
     _fetchExercises();
+    _fetchVocabularies();
   }
 
   Future<void> _fetchCourses() async {
@@ -40,6 +42,17 @@ class _VocabularyExerciseScreenState extends State<VocabularyExerciseScreen> {
     final snapshot = await _firestore.collection('vocabulary_exercises').get();
     setState(() {
       _exercises = snapshot.docs.map((doc) {
+        final data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
+    });
+  }
+
+  Future<void> _fetchVocabularies() async {
+    final snapshot = await _firestore.collection('vocabulary').get();
+    setState(() {
+      _vocabularies = snapshot.docs.map((doc) {
         final data = doc.data();
         data['id'] = doc.id;
         return data;
@@ -66,6 +79,7 @@ class _VocabularyExerciseScreenState extends State<VocabularyExerciseScreen> {
               ExerciseForm(
                 firestore: _firestore,
                 courses: _courses,
+                vocabularies: _vocabularies,
                 onSaved: _fetchExercises,
               ),
               const SizedBox(height: 24),
@@ -76,6 +90,7 @@ class _VocabularyExerciseScreenState extends State<VocabularyExerciseScreen> {
                 exercises: _exercises,
                 firestore: _firestore,
                 courses: _courses,
+                vocabularies: _vocabularies,
                 onUpdated: _fetchExercises,
               ),
             ],

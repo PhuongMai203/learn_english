@@ -6,6 +6,7 @@ class ExerciseList extends StatelessWidget {
   final List<Map<String, dynamic>> exercises;
   final FirebaseFirestore firestore;
   final List<Map<String, dynamic>> courses;
+  final List<Map<String, dynamic>> vocabularies;
   final VoidCallback onUpdated;
 
   const ExerciseList({
@@ -14,6 +15,7 @@ class ExerciseList extends StatelessWidget {
     required this.firestore,
     required this.courses,
     required this.onUpdated,
+    required this.vocabularies,
   });
 
   @override

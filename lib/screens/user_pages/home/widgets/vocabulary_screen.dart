@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:learn_english/components/app_background.dart';
+import 'vocabulary_exercises_screen.dart';
 
 class VocabularyScreen extends StatelessWidget {
   const VocabularyScreen({super.key});
@@ -36,13 +37,15 @@ class VocabularyScreen extends StatelessWidget {
               itemCount: docs.length,
               itemBuilder: (context, index) {
                 final data = docs[index].data() as Map<String, dynamic>;
+                final docId = docs[index].id; // ✅ lấy document ID
 
                 final word = data['word'] ?? '';
                 final meaning = data['meaning'] ?? '';
                 final pronunciation = data['pronunciation'] ?? '';
                 final type = data['type'] ?? '';
 
-                return _buildWordCard(word, meaning, pronunciation, type);
+                return _buildWordCard(
+                    docId, word, meaning, pronunciation, type, context);
               },
             );
           },
@@ -51,8 +54,8 @@ class VocabularyScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildWordCard(
-      String word, String meaning, String phonetic, String type) {
+  Widget _buildWordCard(String docId, String word, String meaning,
+      String phonetic, String type, BuildContext context) {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       margin: const EdgeInsets.symmetric(vertical: 8),
@@ -66,6 +69,16 @@ class VocabularyScreen extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         subtitle: Text("$meaning • $type\n[$phonetic]"),
+        onTap: () {
+          // ✅ mở màn hình bài tập, truyền đúng document ID
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  VocabularyExercisesScreen(vocabularyId: docId),
+            ),
+          );
+        },
       ),
     );
   }
