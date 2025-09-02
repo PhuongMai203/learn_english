@@ -12,9 +12,10 @@ class VocabularyScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text("Từ vựng"),
-          backgroundColor: const Color(0xFF5BC0F8),
+          title: Text("Từ vựng", style: TextStyle(color: Colors.white),),
+          backgroundColor: const Color(0xFFFF7B54),
           elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
