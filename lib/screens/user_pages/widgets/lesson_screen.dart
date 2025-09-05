@@ -22,7 +22,6 @@ class LessonScreen extends StatelessWidget {
           elevation: 0,
           iconTheme: const IconThemeData(color: Colors.white),
         ),
-
         body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('courses')
@@ -53,7 +52,9 @@ class LessonScreen extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               itemCount: lessons.length,
               itemBuilder: (context, index) {
-                final data = lessons[index].data() as Map<String, dynamic>;
+                final doc = lessons[index];
+                final data = doc.data() as Map<String, dynamic>;
+                final lessonId = doc.id; // 👈 lấy lessonId
                 final title = data['title'] ?? 'Bài học';
                 final description = data['description'] ?? '';
                 final isVideo = data['isVideo'] ?? false;
@@ -67,6 +68,7 @@ class LessonScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) => LessonDetailScreen(
+                            lessonId: lessonId,
                             title: title,
                             description: description,
                             mediaUrl: mediaUrl,
