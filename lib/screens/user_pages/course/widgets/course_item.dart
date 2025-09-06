@@ -1,64 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'lesson_screen.dart';
-
-class CourseList extends StatelessWidget {
-  final FirebaseFirestore firestore;
-  final bool filterByNew;
-
-  const CourseList({
-    super.key,
-    required this.firestore,
-    this.filterByNew = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Query query = firestore.collection('courses');
-
-    if (filterByNew) {
-      final now = DateTime.now();
-      final oneMonthAgo = now.subtract(const Duration(days: 30));
-      query = query
-          .where('createdAt', isGreaterThanOrEqualTo: Timestamp.fromDate(oneMonthAgo))
-          .where('createdAt', isLessThanOrEqualTo: Timestamp.fromDate(now));
-    }
-
-    return StreamBuilder<QuerySnapshot>(
-      stream: query.snapshots(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return Center(child: Text('Lỗi: ${snapshot.error}'));
-        }
-
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        final courses = snapshot.data!.docs;
-
-        if (courses.isEmpty) {
-          return const Center(child: Text('Không có khóa học mới'));
-        }
-
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          itemCount: courses.length,
-          itemBuilder: (context, index) {
-            final doc = courses[index];
-            final course = {
-              "id": doc.id,
-              ...doc.data() as Map<String, dynamic>,
-            };
-            return CourseItem(course: course);
-          },
-        );
-      },
-    );
-  }
-}
+import '../../widgets/lesson_screen.dart';
 
 class CourseItem extends StatelessWidget {
   final Map<String, dynamic> course;
@@ -76,6 +20,11 @@ class CourseItem extends StatelessWidget {
 
       final userId = user.uid;
 
+      // Lấy thêm title và description từ course map
+      final title = course['title'] ?? '';
+      final description = course['description'] ?? '';
+      final imageUrl = course['imageUrl'] ?? '';
+
       // Ghi dữ liệu enroll vào Firestore
       await FirebaseFirestore.instance
           .collection('users')
@@ -84,6 +33,9 @@ class CourseItem extends StatelessWidget {
           .doc(courseId)
           .set({
         "courseId": courseId,
+        "title": title,
+        "description": description,
+        "imageUrl": imageUrl,
         "startedAt": FieldValue.serverTimestamp(),
         "progress": 0,
       });
@@ -102,15 +54,23 @@ class CourseItem extends StatelessWidget {
     }
   }
 
+  Future<int> _getLessonCount(String courseId) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('courses')
+        .doc(courseId)
+        .collection('lessons')
+        .get();
+    return snapshot.size; // số lượng document trong lessons
+  }
+
   @override
   Widget build(BuildContext context) {
+    final courseId = course['id'];
     final title = course['title'] ?? 'Khóa học';
     final description = course['description'] ?? 'Mô tả không có sẵn';
     final imageUrl = course['imageUrl'] as String?;
     final level = course['level'] ?? 'All Levels';
     final progress = 0.0;
-    final lessons = 24; // bạn có thể lấy từ Firestore nếu có
-    final time = '8 giờ'; // có thể thay bằng dữ liệu thật từ Firestore
 
     Color courseColor = Colors.blue;
     if (level.contains('Cơ bản')) {
@@ -194,15 +154,26 @@ class CourseItem extends StatelessWidget {
                         Icon(Icons.menu_book,
                             size: 16, color: Colors.grey[600]),
                         const SizedBox(width: 4),
-                        Text('$lessons bài học',
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.grey[600])),
-                        const SizedBox(width: 16),
-                        Icon(Icons.timer, size: 16, color: Colors.grey[600]),
-                        const SizedBox(width: 4),
-                        Text(time,
-                            style: TextStyle(
-                                fontSize: 12, color: Colors.grey[600])),
+                        // 🔥 Dùng FutureBuilder để đếm số lượng bài học
+                        FutureBuilder<int>(
+                          future: _getLessonCount(courseId),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Text("Đang tải...");
+                            }
+                            if (snapshot.hasError) {
+                              return const Text("Lỗi");
+                            }
+                            return Text(
+                              "${snapshot.data} bài học",
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey[600],
+                              ),
+                            );
+                          },
+                        ),
                       ],
                     ),
                     const SizedBox(height: 12),
@@ -244,7 +215,6 @@ class CourseItem extends StatelessWidget {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: () {
-                            final courseId = course['id'];
                             if (courseId != null) {
                               _enrollAndNavigate(context, courseId);
                             }

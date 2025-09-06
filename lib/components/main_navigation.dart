@@ -3,9 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../screens/AuthScreen.dart';
 import '../screens/user_pages/account_screen.dart';
-import '../screens/user_pages/course_screen.dart';
+import '../screens/user_pages/course/course_screen.dart';
 import '../screens/user_pages/home/home_screen.dart';
-import '../screens/user_pages/practice_screen.dart';
+import '../screens/user_pages/practice/practice_screen.dart';
 import '../screens/user_pages/welcome_screen.dart'; // <== IMPORT WELCOME SCREEN
 
 class MainNavigation extends StatefulWidget {
