@@ -17,6 +17,8 @@ class FlashcardsPage extends StatelessWidget {
           title: const Text("Flashcards"),
           backgroundColor: Colors.orange,
           foregroundColor: Colors.white,
+          centerTitle: true,
+          elevation: 0,
         ),
         body: StreamBuilder<QuerySnapshot>(
           stream: firestore
@@ -33,12 +35,18 @@ class FlashcardsPage extends StatelessWidget {
 
             final docs = snapshot.data!.docs;
             if (docs.isEmpty) {
-              return const Center(child: Text("Chưa có từ vựng nào"));
+              return const SizedBox(); // để trống nếu chưa có dữ liệu
             }
 
-            return PageView.builder(
+            return GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2, // 2 cột -> 4 thẻ trên 1 màn hình (2x2)
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 3 / 4, // tỉ lệ đẹp hơn
+              ),
               itemCount: docs.length,
-              controller: PageController(viewportFraction: 0.85),
               itemBuilder: (context, index) {
                 final data = docs[index].data() as Map<String, dynamic>;
 
@@ -47,83 +55,97 @@ class FlashcardsPage extends StatelessWidget {
                 final pronunciation = data["pronunciation"] ?? "";
                 final type = data["type"] ?? "";
 
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
-                  child: FlipCard(
-                    direction: FlipDirection.HORIZONTAL,
-                    front: Card(
-                      elevation: 6,
-                      color: Colors.orange.shade50,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Center(
-                        child: Text(
-                          word,
-                          style: const TextStyle(
-                            fontSize: 28,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.deepOrange,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    ),
-                    back: Card(
-                      elevation: 6,
-                      color: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              word,
-                              style: const TextStyle(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.deepOrange,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              pronunciation,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontStyle: FontStyle.italic,
-                                color: Colors.black54,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              type,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.blueGrey,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            Text(
-                              meaning,
-                              style: const TextStyle(
-                                fontSize: 22,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.teal,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
+                return FlipCard(
+                  direction: FlipDirection.HORIZONTAL,
+                  front: _buildCardFront(word),
+                  back: _buildCardBack(word, pronunciation, type, meaning),
                 );
               },
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardFront(String word) {
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [Colors.orange.shade200, Colors.deepOrange.shade400],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            word,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCardBack(
+      String word, String pronunciation, String type, String meaning) {
+    return Card(
+      elevation: 8,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              word,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepOrange,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              pronunciation,
+              style: const TextStyle(
+                fontSize: 18,
+                fontStyle: FontStyle.italic,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              type,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.blueGrey,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              meaning,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Colors.teal,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );

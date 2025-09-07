@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/mini_game_page.dart';
+import 'pages/mini_games/mini_game_page.dart';
 import 'widgets/practice_card.dart';
 import 'widgets/practice_stat_item.dart';
 import 'pages/flashcards_page.dart';
