@@ -36,6 +36,9 @@ dependencies:
   chewie: ^1.12.1
   youtube_player_flutter: ^9.1.2
   flip_card: ^0.7.0
+  audioplayers: ^6.5.1
+  flutter_tts: ^4.2.3
+  speech_to_text: ^7.3.0
 
 dev_dependencies:
   flutter_test:

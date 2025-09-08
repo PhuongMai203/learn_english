@@ -161,40 +161,6 @@ class PracticeScreen extends StatelessWidget {
                 ),
               ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
-                  'Thống kê luyện tập',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A73E8),
-                  ),
-                ),
-                SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    PracticeStatItem(
-                        icon: Icons.timer,
-                        value: "25 phút",
-                        label: "Hôm nay",
-                        color: Color(0xFFFFA000)),
-                    PracticeStatItem(
-                        icon: Icons.calendar_today,
-                        value: "6 ngày",
-                        label: "Liên tiếp",
-                        color: Color(0xFF1976D2)),
-                    PracticeStatItem(
-                        icon: Icons.emoji_events,
-                        value: "12",
-                        label: "Huy hiệu",
-                        color: Color(0xFF43A047)),
-                  ],
-                ),
-              ],
-            ),
           ),
 
           const SizedBox(height: 24),
@@ -219,9 +185,13 @@ class PracticeScreen extends StatelessWidget {
               ),
             ),
             onPressed: () {
-              // TODO: chuyển đến lộ trình luyện tập trong ngày
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MiniGamePage()),
+              );
             },
           ),
+
         ],
       ),
     );
