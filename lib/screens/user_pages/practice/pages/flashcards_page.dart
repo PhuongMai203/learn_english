@@ -1,10 +1,56 @@
 import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:learn_english/components/app_background.dart';
 
 class FlashcardsPage extends StatelessWidget {
   const FlashcardsPage({super.key});
+
+  Future<void> _saveWordToDictionary(
+      BuildContext context,
+      Map<String, dynamic> wordData,
+      ) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final dictionaryRef = FirebaseFirestore.instance
+        .collection("users")
+        .doc(user.uid)
+        .collection("dictionary");
+
+    // Kiểm tra từ đã tồn tại chưa
+    final existing = await dictionaryRef
+        .where("word", isEqualTo: wordData["word"])
+        .limit(1)
+        .get();
+
+    if (existing.docs.isNotEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Từ này đã có trong từ điển của bạn!"),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Nếu chưa có thì thêm mới
+    await dictionaryRef.add({
+      "word": wordData["word"],
+      "meaning": wordData["meaning"],
+      "pronunciation": wordData["pronunciation"],
+      "type": wordData["type"],
+      "addedAt": FieldValue.serverTimestamp(),
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Đã lưu vào từ điển của bạn!"),
+        backgroundColor: Colors.green,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,30 +81,29 @@ class FlashcardsPage extends StatelessWidget {
 
             final docs = snapshot.data!.docs;
             if (docs.isEmpty) {
-              return const SizedBox(); // để trống nếu chưa có dữ liệu
+              return const Center(child: Text("Chưa có từ vựng nào!"));
             }
 
             return GridView.builder(
               padding: const EdgeInsets.all(16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // 2 cột -> 4 thẻ trên 1 màn hình (2x2)
+                crossAxisCount: 2, // 2 cột
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
-                childAspectRatio: 3 / 4, // tỉ lệ đẹp hơn
+                childAspectRatio: 3 / 4,
               ),
               itemCount: docs.length,
               itemBuilder: (context, index) {
                 final data = docs[index].data() as Map<String, dynamic>;
 
-                final word = data["word"] ?? "";
-                final meaning = data["meaning"] ?? "";
-                final pronunciation = data["pronunciation"] ?? "";
-                final type = data["type"] ?? "";
-
                 return FlipCard(
                   direction: FlipDirection.HORIZONTAL,
-                  front: _buildCardFront(word),
-                  back: _buildCardBack(word, pronunciation, type, meaning),
+                  front: _buildCardFront(data["word"] ?? ""),
+                  back: _buildCardBack(
+                    context,
+                    data,
+                    onSave: () => _saveWordToDictionary(context, data),
+                  ),
                 );
               },
             );
@@ -97,7 +142,15 @@ class FlashcardsPage extends StatelessWidget {
   }
 
   Widget _buildCardBack(
-      String word, String pronunciation, String type, String meaning) {
+      BuildContext context,
+      Map<String, dynamic> data, {
+        required VoidCallback onSave,
+      }) {
+    final word = data["word"] ?? "";
+    final pronunciation = data["pronunciation"] ?? "";
+    final type = data["type"] ?? "";
+    final meaning = data["meaning"] ?? "";
+
     return Card(
       elevation: 8,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
@@ -144,6 +197,20 @@ class FlashcardsPage extends StatelessWidget {
                 color: Colors.teal,
               ),
               textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 5),
+            // Nút lưu từ điển
+            ElevatedButton.icon(
+              onPressed: onSave,
+              label: Text("Lưu vào từ điển", style: TextStyle(color: Colors.white),),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              ),
             ),
           ],
         ),

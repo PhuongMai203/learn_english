@@ -32,6 +32,7 @@ class _CourseScreenState extends State<CourseScreen> {
         backgroundColor: Colors.transparent,
         body: Column(
           children: [
+            const SizedBox(height: 50),
             const CourseHeader(),
             CategoryFilter(
               selectedIndex: _selectedCategory,

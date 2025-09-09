@@ -17,6 +17,8 @@ class WelcomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: 14),
+
                 // Header với logo
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -44,19 +46,25 @@ class WelcomeScreen extends StatelessWidget {
                       onPressed: () {
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => const MainNavigation()),
+                          MaterialPageRoute(
+                              builder: (context) => const MainNavigation()),
                         );
                       },
                       style: TextButton.styleFrom(
                         foregroundColor: const Color(0xFF5A6A9A),
                       ),
-                      child: const Text('Bỏ qua'),
+                      child: const Text(
+                        'Bỏ qua',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
                   ],
                 ),
-      
-                const SizedBox(height: 30),
-      
+
+                const SizedBox(height: 24),
+
                 // Illustration
                 Center(
                   child: Stack(
@@ -79,20 +87,20 @@ class WelcomeScreen extends StatelessWidget {
                       ),
                       Image.asset(
                         'assets/learning_illustration.png',
-                        width: 280,
-                        height: 280,
+                        width: 200,
+                        height: 200,
                       ),
                     ],
                   ),
                 ),
-      
+
                 const SizedBox(height: 20),
-      
+
                 // Tiêu đề
                 RichText(
                   text: const TextSpan(
                     style: TextStyle(
-                      fontSize: 32,
+                      fontSize: 30,
                       fontWeight: FontWeight.w800,
                       height: 1.3,
                     ),
@@ -110,77 +118,79 @@ class WelcomeScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-      
-                const SizedBox(height: 16),
-      
+
+                const SizedBox(height: 20),
+
                 // Mô tả
                 const Text(
                   'Phương pháp học thông minh kết hợp công nghệ AI, thiết kế riêng cho người trưởng thành bận rộn',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 15,
                     color: Color(0xFF5A6A9A),
-                    height: 1.6,
+                    height: 1.5,
                   ),
                 ),
-      
-                const SizedBox(height: 40),
-      
+
+                const SizedBox(height: 90),
+
                 // Các tính năng
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     _buildFeature(
                       icon: Icons.access_time_filled_rounded,
-                      color: Color(0xFF5BC0F8),
+                      color: const Color(0xFF5BC0F8),
                       text: '15 phút/ngày',
                     ),
                     _buildFeature(
                       icon: Icons.auto_awesome_rounded,
-                      color: Color(0xFFFFB84C),
+                      color: const Color(0xFFFFB84C),
                       text: 'Cá nhân hóa',
                     ),
                     _buildFeature(
                       icon: Icons.graphic_eq_rounded,
-                      color: Color(0xFFFF7B54),
+                      color: const Color(0xFFFF7B54),
                       text: 'AI phân tích',
                     ),
                     _buildFeature(
                       icon: Icons.work_rounded,
-                      color: Color(0xFF86A7FC),
+                      color: const Color(0xFF86A7FC),
                       text: 'Chuyên nghiệp',
                     ),
                   ],
                 ),
-      
-                const Spacer(),
-      
+
+                const SizedBox(height: 70),
+
                 // Nút bắt đầu
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 40.0),
+                  padding: const EdgeInsets.only(bottom: 32.0),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const AuthScreen(initialTabIndex: 0)),
+                          MaterialPageRoute(
+                              builder: (context) =>
+                              const AuthScreen(initialTabIndex: 0)),
                         );
                       },
-      
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFFFB84C),
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
                         elevation: 0,
-                        shadowColor: const Color(0xFFFFB84C).withOpacity(0.4),
+                        shadowColor:
+                        const Color(0xFFFFB84C).withOpacity(0.4),
                       ),
                       child: const Text(
                         'Bắt đầu hành trình',
                         style: TextStyle(
-                          fontSize: 18,
+                          fontSize: 17,
                           fontWeight: FontWeight.w700,
                           letterSpacing: 0.5,
                         ),
@@ -209,9 +219,9 @@ class WelcomeScreen extends StatelessWidget {
             color: color.withOpacity(0.15),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: Icon(icon, color: color, size: 28),
+          child: Icon(icon, color: color, size: 26),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         Text(
           text,
           style: TextStyle(

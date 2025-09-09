@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:learn_english/screens/user_pages/welcome_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
+
 import 'screens/auth_gate.dart';
+import 'services/streak_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,10 +12,16 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    // Nếu user đã đăng nhập → cập nhật streak khi app mở
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await StreakService.updateUserStreak();
+    }
   } catch (e) {
-    // Log lỗi nếu khởi tạo Firebase thất bại
     print('Firebase initialization failed: $e');
   }
+
   runApp(const EnglishLearningApp());
 }
 

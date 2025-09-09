@@ -80,7 +80,7 @@ class SocialLoginButtons extends StatelessWidget {
         Row(children: [
           const Expanded(child: Divider()),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 0),
             child: Text(
               'Hoặc tiếp tục với',
               style: TextStyle(
