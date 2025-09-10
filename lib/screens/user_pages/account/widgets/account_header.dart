@@ -75,12 +75,33 @@ class AccountHeader extends StatelessWidget {
                   // Avatar + Tên
                   Row(
                     children: [
-                      const CircleAvatar(
-                        radius: 36,
-                        backgroundColor: Colors.white,
-                        child: Icon(Icons.person,
-                            size: 36, color: Colors.deepPurple),
+                      StreamBuilder<DocumentSnapshot>(
+                        stream: FirebaseFirestore.instance
+                            .collection("users")
+                            .doc(uid)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData || !snapshot.data!.exists) {
+                            return const CircleAvatar(
+                              radius: 36,
+                              backgroundImage: AssetImage("assets/images/user_avatar.png"),
+                            );
+                          }
+
+                          final data = snapshot.data!.data() as Map<String, dynamic>;
+                          final photoURL = data["photoURL"] as String?;
+
+                          return CircleAvatar(
+                            radius: 36,
+                            backgroundColor: Colors.white,
+                            backgroundImage: photoURL != null && photoURL.isNotEmpty
+                                ? NetworkImage(photoURL)
+                                : const AssetImage("assets/images/user_avatar.png")
+                            as ImageProvider,
+                          );
+                        },
                       ),
+
                       const SizedBox(width: 20),
                       Expanded(
                         child: Column(

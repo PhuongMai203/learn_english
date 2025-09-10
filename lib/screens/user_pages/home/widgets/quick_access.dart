@@ -76,7 +76,7 @@ class _QuickAccessIcon extends StatelessWidget {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.deepPurple[50],
+              color: Color(0xFFFFFFFF),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
@@ -86,7 +86,7 @@ class _QuickAccessIcon extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(icon, color: Colors.deepPurple, size: 28),
+            child: Icon(icon, color: Colors.orange, size: 28),
           ),
           const SizedBox(height: 8),
           Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),

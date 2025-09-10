@@ -33,7 +33,7 @@ class _CourseScreenState extends State<CourseScreen> {
         body: Column(
           children: [
             const SizedBox(height: 50),
-            const CourseHeader(),
+
             CategoryFilter(
               selectedIndex: _selectedCategory,
               onSelected: (index) {

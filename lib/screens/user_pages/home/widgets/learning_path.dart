@@ -116,7 +116,7 @@ class _LearningPathState extends State<LearningPath> {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.purple]
+              colors: [Colors.purple, Color(0xFF5AA0E3)]
                   .map((c) => c.withOpacity(0.1))
                   .toList(),
               begin: Alignment.topLeft,
@@ -129,11 +129,11 @@ class _LearningPathState extends State<LearningPath> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.deepPurple[100],
+                  color: Color(0xFFFFFFFF),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.auto_awesome_mosaic,
-                    size: 30, color: Colors.deepPurple),
+                    size: 30, color: Color(0xFF27629C)),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -155,7 +155,7 @@ class _LearningPathState extends State<LearningPath> {
                             child: LinearProgressIndicator(
                               value: _progress,
                               backgroundColor: Colors.grey[300],
-                              color: Colors.deepPurple,
+                              color: Color(0xFF22619E),
                               minHeight: 8,
                               borderRadius: BorderRadius.circular(4),
                             ),
@@ -163,7 +163,7 @@ class _LearningPathState extends State<LearningPath> {
                           const SizedBox(width: 10),
                           Text("${(_progress * 100).toStringAsFixed(0)}%",
                               style: const TextStyle(
-                                  color: Colors.deepPurple)),
+                                  color: Color(0xFF326DA5))),
                         ],
                       ),
                       const SizedBox(height: 4),
@@ -177,7 +177,7 @@ class _LearningPathState extends State<LearningPath> {
               ElevatedButton(
                 onPressed: _total > 0 ? () {} : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
+                  backgroundColor: Color(0xFF5AA0E3),
                   foregroundColor: Colors.white,
                   disabledBackgroundColor: Colors.grey,
                   disabledForegroundColor: Colors.white,

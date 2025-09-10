@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text("Xin chào học viên 👋"),
-          backgroundColor: Colors.deepPurple,
+          backgroundColor: Color(0xFF5AA0E3),
           foregroundColor: Colors.white,
           actions: [
             IconButton(

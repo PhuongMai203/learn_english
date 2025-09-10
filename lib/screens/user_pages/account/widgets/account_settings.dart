@@ -5,8 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:learn_english/components/app_background.dart';
-
-import 'logout_button.dart';
+import 'change_password_page.dart';
 
 class AccountSettingsPage extends StatefulWidget {
   const AccountSettingsPage({super.key});
@@ -65,7 +64,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text("Cài đặt tài khoản"),
+          title: const Text(
+            "Cài đặt tài khoản",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
           backgroundColor: const Color(0xFF5D8BF4),
           foregroundColor: Colors.white,
         ),
@@ -88,62 +90,80 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
             return ListView(
               children: [
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
 
                 _buildSectionTitle("Thông tin cá nhân"),
                 ListTile(
                   leading: CircleAvatar(
-                    radius: 25,
+                    radius: 32,
                     backgroundImage: photoURL != null
                         ? NetworkImage(photoURL)
                         : const AssetImage("assets/user_avatar.png")
                     as ImageProvider,
                   ),
-                  title: Text(_isUploading ? "Đang tải ảnh..." : "Đổi ảnh đại diện"),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                  title: Text(
+                    _isUploading ? "Đang tải ảnh..." : "Đổi ảnh đại diện",
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 18),
                   onTap: _isUploading ? null : _pickAndUploadImage,
                 ),
                 const Divider(height: 1),
 
                 ListTile(
-                  leading: const Icon(Icons.person),
-                  title: const Text("Tên hiển thị"),
-                  subtitle: Text(username),
+                  leading: const Icon(Icons.person, color: Color(0xFF5D8BF4), size: 28),
+                  title: const Text("Tên hiển thị",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                  subtitle: Text(username,
+                      style: const TextStyle(fontSize: 16, color: Colors.black87)),
                   onTap: () {},
                 ),
                 ListTile(
-                  leading: const Icon(Icons.email),
-                  title: const Text("Email"),
-                  subtitle: Text(user?.email ?? ""),
+                  leading: const Icon(Icons.email, color: Color(0xFF5D8BF4), size: 28),
+                  title: const Text("Email",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                  subtitle: Text(user?.email ?? "",
+                      style: const TextStyle(fontSize: 16, color: Colors.black87)),
                   onTap: () {},
                 ),
 
                 const SizedBox(height: 20),
                 _buildSectionTitle("Bảo mật"),
                 ListTile(
-                  leading: const Icon(Icons.lock),
-                  title: const Text("Đổi mật khẩu"),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {},
-                ),
-
-                const SizedBox(height: 20),
-                _buildSectionTitle("Tùy chọn"),
-                SwitchListTile(
-                  secondary: const Icon(Icons.dark_mode),
-                  title: const Text("Chế độ tối"),
-                  value: false,
-                  onChanged: (val) {},
+                  leading: const Icon(Icons.lock, color: Color(0xFF5D8BF4), size: 28),
+                  title: const Text("Đổi mật khẩu",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                  trailing: const Icon(Icons.arrow_forward_ios, size: 18),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ChangePasswordPage()),
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 20),
                 _buildSectionTitle("Khác"),
-                const LogoutButton(),
+                const SizedBox(height: 10),
                 ListTile(
-                  leading: const Icon(Icons.delete_forever, color: Colors.red),
-                  title: const Text("Xóa tài khoản",
-                      style: TextStyle(color: Colors.red)),
-                  onTap: () {},
+                  leading: const Icon(Icons.logout, color: Colors.red, size: 28),
+                  title: const Text(
+                    "Đăng xuất",
+                    style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.w500),
+                  ),
+                  onTap: () async {
+                    await FirebaseAuth.instance.signOut();
+                  },
+                ),
+
+                const SizedBox(height: 10),
+                ListTile(
+                  leading: const Icon(Icons.delete_forever, color: Colors.redAccent, size: 28),
+                  title: const Text(
+                    "Xóa tài khoản",
+                    style: TextStyle(color: Colors.redAccent, fontSize: 18, fontWeight: FontWeight.w500),
+                  ),
+                  onTap: _deleteAccount,
                 ),
               ],
             );
@@ -153,12 +173,81 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     );
   }
 
+  Future<void> _deleteAccount() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Xác nhận xóa tài khoản"),
+        content: const Text(
+          "Bạn có chắc chắn muốn xóa tài khoản? Hành động này không thể hoàn tác.",
+        ),
+        actions: [
+          TextButton(
+            child: const Text("Hủy"),
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+            child: const Text("Xóa", style: TextStyle(color: Colors.white)),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    try {
+      await FirebaseFirestore.instance.collection("users").doc(user.uid).delete();
+
+      final avatarRef =
+      FirebaseStorage.instance.ref().child("user_avatars/${user.uid}.jpg");
+      try {
+        await avatarRef.delete();
+      } catch (_) {}
+
+      await user.delete();
+
+      if (mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == "requires-recent-login") {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Vui lòng đăng nhập lại để xóa tài khoản"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Lỗi: ${e.message}"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Lỗi: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Text(title,
-          style: const TextStyle(
-              fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey)),
+      child: Text(
+        title,
+        style: const TextStyle(
+            fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey),
+      ),
     );
   }
 }

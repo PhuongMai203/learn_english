@@ -125,12 +125,10 @@ class _AuthScreenState extends State<AuthScreen>
                   Image.asset('assets/logo.png', width: 80, height: 80),
                   const SizedBox(height: 20),
 
-                  /// 👉 Tab Selector
                   AuthTabSelector(controller: _tabController),
 
                   const SizedBox(height: 10),
 
-                  /// 👉 Tab Views
                   SizedBox(
                     height: MediaQuery.of(context).size.height * 0.6,
                     child: TabBarView(

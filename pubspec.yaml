@@ -39,6 +39,9 @@ dependencies:
   audioplayers: ^6.5.1
   flutter_tts: ^4.2.3
   speech_to_text: ^7.3.0
+  googleapis: ^14.0.0
+  googleapis_auth: ^2.0.0
+  omni_datetime_picker: ^2.3.1
 
 dev_dependencies:
   flutter_test:

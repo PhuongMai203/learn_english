@@ -29,7 +29,7 @@ class CategoryFilter extends StatelessWidget {
               child: ChoiceChip(
                 label: Center(child: Text(categories[index])),
                 selected: isSelected,
-                selectedColor: Color(0xFF964BFF),
+                selectedColor: Color(0xFF3E83E4),
                 labelStyle: TextStyle(
                   color: isSelected ? Colors.white : Colors.black,
                 ),

@@ -76,18 +76,18 @@ class StatsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.deepPurple[50],
+        color: Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         children: [
-          Icon(icon, color: Colors.deepPurple, size: 28),
+          Icon(icon, color: Colors.orange, size: 28),
           const SizedBox(height: 8),
           Text(value,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.deepPurple,
+                color: Colors.orange,
               )),
           const SizedBox(height: 4),
           Text(label, style: const TextStyle(fontSize: 12)),

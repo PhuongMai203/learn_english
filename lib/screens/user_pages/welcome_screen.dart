@@ -131,7 +131,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 90),
+                const SizedBox(height: 50),
 
                 // Các tính năng
                 Row(
@@ -160,7 +160,7 @@ class WelcomeScreen extends StatelessWidget {
                   ],
                 ),
 
-                const SizedBox(height: 70),
+                const SizedBox(height: 40),
 
                 // Nút bắt đầu
                 Padding(

@@ -1,7 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CourseHeader extends StatelessWidget {
   const CourseHeader({super.key});
+
+  Future<String?> _getUserPhotoURL() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return null;
+
+    try {
+      final snapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (snapshot.exists) {
+        return snapshot.data()?['photoURL'] as String?;
+      }
+    } catch (e) {
+      debugPrint("Lỗi lấy avatar: $e");
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,10 +37,29 @@ class CourseHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 25,
-            backgroundColor: Colors.deepPurple[100],
-            child: const Icon(Icons.person, color: Colors.deepPurple),
+          FutureBuilder<String?>(
+            future: _getUserPhotoURL(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircleAvatar(
+                  radius: 25,
+                  backgroundColor: Colors.deepPurple[100],
+                  child: const CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.deepPurple,
+                  ),
+                );
+              }
+
+              final photoURL = snapshot.data;
+              return CircleAvatar(
+                radius: 25,
+                backgroundImage: photoURL != null && photoURL.isNotEmpty
+                    ? NetworkImage(photoURL)
+                    : const AssetImage("assets/user_avatar.png")
+                as ImageProvider,
+              );
+            },
           ),
           const SizedBox(width: 15),
           Expanded(
@@ -27,7 +67,7 @@ class CourseHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  "Chào buổi sáng, Nguyễn Văn A!",
+                  "Chào buổi học viên",
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),
@@ -37,10 +77,6 @@ class CourseHeader extends StatelessWidget {
                 ),
               ],
             ),
-          ),
-          IconButton(
-            icon: Icon(Icons.notifications, color: Colors.deepPurple[400]),
-            onPressed: () {},
           ),
         ],
       ),
