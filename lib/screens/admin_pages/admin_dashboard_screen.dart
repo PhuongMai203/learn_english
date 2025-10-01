@@ -4,10 +4,9 @@ import 'package:iconsax_flutter/iconsax_flutter.dart';
 
 import '../../components/app_background.dart';
 import 'learning_content/learning_content_screen.dart';
-import 'learning_content/tabs/lessons_tab.dart';
 import 'user_management_screen.dart';
 import 'widgets/AnalyticsScreen.dart';
-import 'widgets/MessagingScreen.dart';
+import 'widgets/recent_activities.dart';
 
 class AdminDashboardScreen extends StatelessWidget {
   const AdminDashboardScreen({super.key});
@@ -45,7 +44,7 @@ class AdminDashboardScreen extends StatelessWidget {
               const SizedBox(height: 24),
               _buildMainDashboard(context),
               const SizedBox(height: 24),
-              _buildRecentActivities(),
+              const RecentActivities(),
             ],
           ),
         ),
@@ -226,13 +225,6 @@ class AdminDashboardScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (_) => const AnalyticsScreen()),
               );
             }),
-            _buildDashboardCard(Iconsax.message, 'Nhắn tin', Colors.teal, () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const MessagingScreen()),
-              );
-            }),
-
           ],
         ),
       ],
@@ -277,70 +269,6 @@ class AdminDashboardScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildRecentActivities() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Hoạt động gần đây',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            children: [
-              _buildActivityItem('Nguyễn Văn A', 'đã hoàn thành khóa học Ngữ pháp nâng cao', '10 phút trước'),
-              _buildActivityItem('Trần Thị B', 'đã đăng ký khóa học mới', '25 phút trước'),
-              _buildActivityItem('Lê Văn C', 'đã gửi bài tập viết luận', '1 giờ trước'),
-              _buildActivityItem('Phạm Thị D', 'được thăng hạng Vàng', '2 giờ trước'),
-              _buildActivityItem('Hoàng Văn E', 'đã bình luận trong diễn đàn', '3 giờ trước'),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActivityItem(String user, String action, String time) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: const CircleAvatar(
-        backgroundColor: Colors.grey,
-        backgroundImage: AssetImage('assets/user_avatar.png'),
-
-      ),
-      title: Text.rich(
-        TextSpan(
-          children: [
-            TextSpan(
-              text: user,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            TextSpan(
-              text: ' $action',
-              style: const TextStyle(color: Colors.black),
-            ),
-          ],
-        ),
-        maxLines: 2,
-        overflow: TextOverflow.ellipsis,
-      ),
-      subtitle: Text(
-        time,
-        style: const TextStyle(color: Colors.grey, fontSize: 12),
-      ),
-      trailing: const Icon(Icons.more_vert, color: Colors.grey),
     );
   }
 }

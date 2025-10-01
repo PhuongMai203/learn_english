@@ -17,16 +17,16 @@ class AccountScreen extends StatelessWidget {
     return AppBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
+
         body: CustomScrollView(
           slivers: [
             AccountHeader(user: user, username: username),
-      
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: const [
-                    AchievementSection(),
+                    // AchievementSection(),
                     SizedBox(height: 20),
                     SettingsSection(),
                     SizedBox(height: 20),

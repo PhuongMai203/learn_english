@@ -10,7 +10,6 @@ import 'widgets/quick_access.dart';
 import 'widgets/achievements_card.dart';
 import 'widgets/daily_suggestion_card.dart';
 import 'widgets/motivation_banner.dart';
-import 'widgets/stats_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -86,7 +85,6 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: 16),
               MotivationBanner(context: context),
               const SizedBox(height: 16),
-              const StatsCard(),
             ],
           ),
         ),

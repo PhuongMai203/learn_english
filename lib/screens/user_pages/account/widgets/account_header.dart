@@ -53,6 +53,7 @@ class AccountHeader extends StatelessWidget {
     return SliverAppBar(
       expandedHeight: 300,
       backgroundColor: const Color(0xFFF7F9FC),
+      automaticallyImplyLeading: false,
       flexibleSpace: FlexibleSpaceBar(
         background: ClipRRect(
           borderRadius: const BorderRadius.only(

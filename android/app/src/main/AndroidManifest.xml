@@ -39,6 +39,12 @@
                 <!-- THAY YOUR_REVERSED_CLIENT_ID BẰNG GIÁ TRỊ THỰC TẾ -->
                 <data android:scheme="com.googleusercontent.apps.p2315jbehglhpcp9iep89fap8tad5paf"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="helpconnectmomo" />
+            </intent-filter>
         </activity>
 
         <meta-data

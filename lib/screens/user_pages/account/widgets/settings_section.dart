@@ -9,76 +9,74 @@ class SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBackground(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.9),
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 15,
-                offset: const Offset(0, 6),
-              )
-            ],
-          ),
-          child: Column(
-            children: [
-              _SettingsItem(
-                icon: Icons.settings,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF5D8BF4), Color(0xFF3A64D8)],
-                ),
-                title: 'Cài đặt tài khoản',
-                subtitle: 'Cập nhật thông tin cá nhân',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const AccountSettingsPage(),
-                    ),
-                  );
-                },
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(10),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.9),
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 15,
+              offset: const Offset(0, 6),
+            )
+          ],
+        ),
+        child: Column(
+          children: [
+            _SettingsItem(
+              icon: Icons.settings,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF5D8BF4), Color(0xFF3A64D8)],
               ),
-              const Divider(height: 1, thickness: 0.5),
-              _SettingsItem(
-                icon: Icons.book,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFF9F29), Color(0xFFE36C1A)],
-                ),
-                title: 'Từ điển cá nhân',
-                subtitle: 'Xem lại những từ đã học',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const PersonalDictionaryPage(),
-                    ),
-                  );
-                },
+              title: 'Cài đặt tài khoản',
+              subtitle: 'Cập nhật thông tin cá nhân',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const AccountSettingsPage(),
+                  ),
+                );
+              },
+            ),
+            const Divider(height: 1, thickness: 0.5),
+            _SettingsItem(
+              icon: Icons.book,
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFF9F29), Color(0xFFE36C1A)],
               ),
+              title: 'Từ điển cá nhân',
+              subtitle: 'Xem lại những từ đã học',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PersonalDictionaryPage(),
+                  ),
+                );
+              },
+            ),
 
-              const Divider(height: 1, thickness: 0.5),
-              _SettingsItem(
-                icon: Icons.notifications,
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF86A3E3), Color(0xFF4C6EDB)],
-                ),
-                title: 'Thông báo',
-                subtitle: 'Cài đặt nhắc nhở học tập',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const ReminderSettingsPage(),
-                    ),
-                  );
-                },
+            const Divider(height: 1, thickness: 0.5),
+            _SettingsItem(
+              icon: Icons.notifications,
+              gradient: const LinearGradient(
+                colors: [Color(0xFF86A3E3), Color(0xFF4C6EDB)],
               ),
-            ],
-          ),
+              title: 'Thông báo',
+              subtitle: 'Cài đặt nhắc nhở học tập',
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ReminderSettingsPage(),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

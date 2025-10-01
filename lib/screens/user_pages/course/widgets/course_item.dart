@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../payment/payment_screen.dart';
 import '../../widgets/lesson_screen.dart';
 
 class CourseItem extends StatelessWidget {
@@ -20,12 +21,61 @@ class CourseItem extends StatelessWidget {
 
       final userId = user.uid;
 
-      // Lấy thêm title và description từ course map
-      final title = course['title'] ?? '';
-      final description = course['description'] ?? '';
-      final imageUrl = course['imageUrl'] ?? '';
+      // 🔹 Lấy thông tin người dùng (tên)
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .get();
+      final userName = userDoc.data()?['name'] ?? 'Người dùng';
 
-      // Ghi dữ liệu enroll vào Firestore
+      // 🔹 Lấy thông tin khóa học
+      final courseDoc = await FirebaseFirestore.instance
+          .collection('courses')
+          .doc(courseId)
+          .get();
+
+      if (!courseDoc.exists) return;
+
+      final data = courseDoc.data()!;
+      final courseTitle = data['title'] ?? '';
+      final description = data['description'] ?? '';
+      final imageUrl = data['imageUrl'] ?? '';
+      final level = data['level'] ?? '';
+      final price = data['price'] ?? 0;
+
+      // Nếu là khóa nâng cao thì kiểm tra enroll
+      if (level == 'Nâng cao') {
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .collection('enrollments')
+            .doc(courseId)
+            .get();
+
+        if (doc.exists) {
+          // Đã mua → vào học
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LessonScreen(courseId: courseId),
+            ),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PaymentScreen(
+                price: price,
+                courseId: courseId,
+                courseTitle: courseTitle,
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Nếu miễn phí → enroll ngay
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
@@ -33,14 +83,13 @@ class CourseItem extends StatelessWidget {
           .doc(courseId)
           .set({
         "courseId": courseId,
-        "title": title,
+        "title": courseTitle,
         "description": description,
         "imageUrl": imageUrl,
         "startedAt": FieldValue.serverTimestamp(),
         "progress": 0,
       });
 
-      // Điều hướng sang LessonScreen
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -60,7 +109,7 @@ class CourseItem extends StatelessWidget {
         .doc(courseId)
         .collection('lessons')
         .get();
-    return snapshot.size; // số lượng document trong lessons
+    return snapshot.size;
   }
 
   @override
@@ -85,7 +134,6 @@ class CourseItem extends StatelessWidget {
       elevation: 3,
       child: InkWell(
         borderRadius: BorderRadius.circular(15),
-        onTap: () {},
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
@@ -154,7 +202,6 @@ class CourseItem extends StatelessWidget {
                         Icon(Icons.menu_book,
                             size: 16, color: Colors.grey[600]),
                         const SizedBox(width: 4),
-                        // 🔥 Dùng FutureBuilder để đếm số lượng bài học
                         FutureBuilder<int>(
                           future: _getLessonCount(courseId),
                           builder: (context, snapshot) {
