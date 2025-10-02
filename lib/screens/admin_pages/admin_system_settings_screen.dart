@@ -2,11 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../../components/app_background.dart';
-import '../user_pages/settings/score_management_screen.dart';
 import '../user_pages/settings/system_update_screen.dart';
 import '../user_pages/welcome_screen.dart';
 import 'widgets/AdminStatisticsScreen.dart';
-import 'widgets/PromotionMarketingScreen.dart'; // ✅ Thêm import
+import 'widgets/PromotionMarketingScreen.dart';
 
 class AdminSystemSettingsScreen extends StatelessWidget {
   const AdminSystemSettingsScreen({super.key});
@@ -33,7 +32,7 @@ class AdminSystemSettingsScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text(
-            'Cài đặt hệ thống (Admin)',
+            'Cài đặt hệ thống',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Colors.white,
@@ -53,18 +52,6 @@ class AdminSystemSettingsScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildSectionTitle('Quản lý nội dung'),
-              _buildSettingTile(
-                icon: Icons.scoreboard,
-                title: 'Quản lý điểm số',
-                subtitle: 'Tuỳ chỉnh hệ thống tính điểm',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (_) => const ScoreManagementScreen()),
-                  );
-                },
-              ),
               _buildSettingTile(
                 icon: Icons.campaign,
                 title: 'Khuyến mãi & Tiếp thị',

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'pages/mini_games/mini_game_page.dart';
 import 'widgets/practice_card.dart';
-import 'widgets/practice_stat_item.dart';
 import 'pages/flashcards_page.dart';
 import 'pages/listening_page.dart';
 import 'pages/speaking_page.dart';
@@ -143,26 +142,6 @@ class PracticeScreen extends StatelessWidget {
               ),
             ],
           ),
-
-          const SizedBox(height: 32),
-
-          // Thống kê luyện tập
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  spreadRadius: 2,
-                  blurRadius: 8,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-          ),
-
           const SizedBox(height: 24),
 
           // Nút hành động chính

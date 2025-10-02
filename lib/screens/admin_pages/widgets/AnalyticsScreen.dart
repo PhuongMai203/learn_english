@@ -69,14 +69,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         appBar: AppBar(
           title: const Text(
             'Phân tích',
-            style: TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold),
+            style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
           ),
           backgroundColor: Colors.white,
           elevation: 2,
-          iconTheme: const IconThemeData(color: Colors.deepPurple),
+          iconTheme: const IconThemeData(color: Colors.red),
         ),
         body: isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator(color: Colors.red))
             : Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -93,7 +93,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         barRods: [
                           BarChartRodData(
                             toY: item.value.toDouble(),
-                            color: Colors.deepPurple,
+                            color: Colors.red,
                             width: 18,
                           ),
                         ],
@@ -145,13 +145,14 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       children: [
                         Text(item.label,
                             style: const TextStyle(
-                                fontSize: 14, fontWeight: FontWeight.bold)),
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold)),
                         const SizedBox(height: 8),
                         Text(item.value.toString(),
                             style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.deepPurple)),
+                                color: Colors.red)),
                       ],
                     ),
                   );

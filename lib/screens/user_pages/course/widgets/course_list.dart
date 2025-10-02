@@ -6,13 +6,13 @@ import 'course_item.dart';
 class CourseList extends StatelessWidget {
   final FirebaseFirestore firestore;
   final bool filterByNew;
-  final String searchQuery; // 👈 thêm tham số tìm kiếm
+  final String searchQuery;
 
   const CourseList({
     super.key,
     required this.firestore,
     this.filterByNew = false,
-    this.searchQuery = "", // 👈 mặc định rỗng
+    this.searchQuery = "",
   });
 
   @override

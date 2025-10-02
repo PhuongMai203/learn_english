@@ -6,7 +6,6 @@ import '../welcome_screen.dart';
 import 'learning_categories_screen.dart';
 import 'notifications_settings_screen.dart';
 import 'privacy_policy_screen.dart';
-import 'score_management_screen.dart';
 import 'system_update_screen.dart';
 
 class SystemSettingsScreen extends StatelessWidget {
@@ -88,18 +87,6 @@ class SystemSettingsScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const LearningCategoriesScreen()),
-                  );
-                },
-
-              ),
-              _buildSettingTile(
-                icon: Icons.scoreboard,
-                title: 'Quản lý điểm số',
-                subtitle: 'Tuỳ chỉnh hệ thống tính điểm',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ScoreManagementScreen()),
                   );
                 },
 
