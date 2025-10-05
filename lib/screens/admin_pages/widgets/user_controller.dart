@@ -1,23 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
 class UserController {
   static Future<List<Map<String, dynamic>>> fetchUsersFromFirestore() async {
     final snapshot = await FirebaseFirestore.instance.collection('users').get();
-    return snapshot.docs
-        .where((doc) => doc['role'] != 'admin')
-        .map((doc) => {
-      'name': doc['username'] ?? 'Không có tên',
-      'email': doc['email'] ?? 'Không có email',
-      'role': doc['role'] ?? 'user',
-      'status': doc.data().containsKey('status') ? doc['status'] : 'Active',
-      'joinDate': doc['createdAt'] != null
-          ? _formatTimestamp(doc['createdAt'])
-          : 'Chưa rõ',
-      'photoURL': doc.data().containsKey('photoURL') ? doc['photoURL'] : '',
-      'docId': doc.id,
-    })
-        .toList();
+
+    print('✅ Fetched ${snapshot.docs.length} users');
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      return {
+        'docId': doc.id,
+        'username': data['username'] ?? 'Không có tên',
+        'email': data['email'] ?? 'Không có email',
+        'phone': data['phone'] ?? 'Không có số điện thoại',
+        'role': data['role'] ?? 'user',
+        'status': data['status'] ?? 'Active',
+        'joinDate': data['createdAt'] != null
+            ? _formatTimestamp(data['createdAt'])
+            : 'Chưa rõ',
+        'photoURL': data['photoURL'] ?? '',
+
+      };
+    }).toList();
   }
 
   static Future<void> deleteUser(String docId) async {

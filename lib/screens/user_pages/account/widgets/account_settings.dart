@@ -21,14 +21,12 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   Future<void> _pickAndUploadImage() async {
     final picker = ImagePicker();
     final picked = await picker.pickImage(source: ImageSource.gallery);
-
     if (picked == null) return;
 
     setState(() => _isUploading = true);
 
     try {
       final file = File(picked.path);
-
       final storageRef =
       FirebaseStorage.instance.ref().child("user_avatars/${user!.uid}.jpg");
       await storageRef.putFile(file);
@@ -53,6 +51,59 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       );
     } finally {
       setState(() => _isUploading = false);
+    }
+  }
+
+  Future<void> _editPhone(String currentPhone) async {
+    final controller = TextEditingController(text: currentPhone);
+
+    final newPhone = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Cập nhật số điện thoại"),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.phone,
+          decoration: const InputDecoration(
+            labelText: "Số điện thoại mới",
+            hintText: "Nhập số điện thoại...",
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Hủy"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, controller.text.trim()),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF5D8BF4)),
+            child: const Text("Lưu", style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (newPhone == null || newPhone.isEmpty) return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(user!.uid)
+          .update({"phone": newPhone});
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Cập nhật số điện thoại thành công"),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Lỗi khi cập nhật: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -87,6 +138,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
             final userData = snapshot.data!.data() as Map<String, dynamic>;
             final username = userData["username"] ?? "Chưa có tên";
+            final phone = userData["phone"] ?? "Chưa cập nhật";
 
             return ListView(
               children: [
@@ -103,7 +155,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                   ),
                   title: Text(
                     _isUploading ? "Đang tải ảnh..." : "Đổi ảnh đại diện",
-                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 18),
                   onTap: _isUploading ? null : _pickAndUploadImage,
@@ -111,33 +164,54 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 const Divider(height: 1),
 
                 ListTile(
-                  leading: const Icon(Icons.person, color: Color(0xFF5D8BF4), size: 28),
+                  leading: const Icon(Icons.person,
+                      color: Color(0xFF5D8BF4), size: 28),
                   title: const Text("Tên hiển thị",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                      style:
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
                   subtitle: Text(username,
-                      style: const TextStyle(fontSize: 16, color: Colors.black87)),
-                  onTap: () {},
+                      style: const TextStyle(
+                          fontSize: 16, color: Colors.black87)),
                 ),
+
                 ListTile(
-                  leading: const Icon(Icons.email, color: Color(0xFF5D8BF4), size: 28),
+                  leading: const Icon(Icons.email,
+                      color: Color(0xFF5D8BF4), size: 28),
                   title: const Text("Email",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                      style:
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
                   subtitle: Text(user?.email ?? "",
-                      style: const TextStyle(fontSize: 16, color: Colors.black87)),
-                  onTap: () {},
+                      style: const TextStyle(
+                          fontSize: 16, color: Colors.black87)),
+                ),
+
+                ListTile(
+                  leading: const Icon(Icons.phone,
+                      color: Color(0xFF5D8BF4), size: 28),
+                  title: const Text("Số điện thoại",
+                      style:
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                  subtitle: Text(phone,
+                      style: const TextStyle(
+                          fontSize: 16, color: Colors.black87)),
+                  trailing: const Icon(Icons.edit, size: 20),
+                  onTap: () => _editPhone(phone),
                 ),
 
                 const SizedBox(height: 20),
                 _buildSectionTitle("Bảo mật"),
                 ListTile(
-                  leading: const Icon(Icons.lock, color: Color(0xFF5D8BF4), size: 28),
+                  leading: const Icon(Icons.lock,
+                      color: Color(0xFF5D8BF4), size: 28),
                   title: const Text("Đổi mật khẩu",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                      style:
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 18),
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const ChangePasswordPage()),
+                      MaterialPageRoute(
+                          builder: (_) => const ChangePasswordPage()),
                     );
                   },
                 ),
@@ -146,10 +220,14 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
                 _buildSectionTitle("Khác"),
                 const SizedBox(height: 10),
                 ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red, size: 28),
+                  leading:
+                  const Icon(Icons.logout, color: Colors.red, size: 28),
                   title: const Text(
                     "Đăng xuất",
-                    style: TextStyle(color: Colors.red, fontSize: 18, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                        color: Colors.red,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500),
                   ),
                   onTap: () async {
                     await FirebaseAuth.instance.signOut();
@@ -158,10 +236,14 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
                 const SizedBox(height: 10),
                 ListTile(
-                  leading: const Icon(Icons.delete_forever, color: Colors.redAccent, size: 28),
+                  leading: const Icon(Icons.delete_forever,
+                      color: Colors.redAccent, size: 28),
                   title: const Text(
                     "Xóa tài khoản",
-                    style: TextStyle(color: Colors.redAccent, fontSize: 18, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                        color: Colors.redAccent,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500),
                   ),
                   onTap: _deleteAccount,
                 ),
@@ -191,7 +273,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-            child: const Text("Xóa", style: TextStyle(color: Colors.white)),
+            child:
+            const Text("Xóa", style: TextStyle(color: Colors.white)),
             onPressed: () => Navigator.pop(context, true),
           ),
         ],

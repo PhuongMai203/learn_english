@@ -22,20 +22,13 @@ class _AdminNavbarState extends State<AdminNavbar> {
     const AdminSystemSettingsScreen(),
   ];
 
-  final List<String> _titles = [
-    'Dashboard',
-    'Nội dung học',
-    'Người dùng',
-    'Cài đặt',
-  ];
-
   @override
   Widget build(BuildContext context) { // Đã thêm dấu ngoặc nhọn `{`
     return Scaffold(
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        selectedItemColor: Colors.indigo,
+        selectedItemColor: Color(0xFF3CA395),
         unselectedItemColor: Colors.grey,
         onTap: (index) {
           setState(() {
@@ -45,7 +38,7 @@ class _AdminNavbarState extends State<AdminNavbar> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+            label: 'Trang chủ',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.book),

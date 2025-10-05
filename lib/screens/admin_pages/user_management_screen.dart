@@ -41,13 +41,16 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: Colors.blue.shade50,
-        title: const Text('Xác nhận xóa'),
-        content: Text('Bạn có chắc chắn muốn xóa tài khoản này không?'),
+        backgroundColor: const Color(0xFFE3F9F6), // xanh ngọc nhạt pastel
+        title: const Text(
+          'Xác nhận xóa',
+          style: TextStyle(color: Color(0xFF1C7D71)),
+        ),
+        content: const Text('Bạn có chắc chắn muốn xóa tài khoản này không?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Hủy'),
+            child: const Text('Hủy', style: TextStyle(color: Color(0xFF1C7D71))),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -56,10 +59,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
               _loadUsers();
             },
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: Text('Xóa', style: TextStyle(
-              color: Colors.white
-            ),),
-
+            child: const Text('Xóa', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -69,7 +69,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   void _showUserDialog({Map<String, dynamic>? user, int? index}) {
     final usernameController = TextEditingController(text: user?['username'] ?? '');
     final emailController = TextEditingController(text: user?['email'] ?? '');
-    final roleController = TextEditingController(text: user?['role'] ?? '');
+    final phoneController = TextEditingController(text: user?['phone'] ?? '');
 
     showDialog(
       context: context,
@@ -78,7 +78,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: Colors.blue[50],
+            color: const Color(0xFFE3F9F6), // nền xanh ngọc pastel rất nhạt
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -89,7 +89,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.blueAccent,
+                  color: Color(0xFF1C7D71), // xanh ngọc đậm
                 ),
               ),
               const SizedBox(height: 20),
@@ -97,7 +97,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 controller: usernameController,
                 decoration: InputDecoration(
                   labelText: 'Tên đăng nhập',
-                  prefixIcon: const Icon(Icons.person, color: Colors.blue),
+                  prefixIcon: const Icon(Icons.person, color: Color(0xFF7DD1C6)),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -108,7 +108,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 controller: emailController,
                 decoration: InputDecoration(
                   labelText: 'Email',
-                  prefixIcon: const Icon(Icons.email, color: Colors.blue),
+                  prefixIcon: const Icon(Icons.email, color: Color(0xFF7DD1C6)),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -116,10 +116,10 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
               ),
               const SizedBox(height: 15),
               TextField(
-                controller: roleController,
+                controller: phoneController,
                 decoration: InputDecoration(
-                  labelText: 'Vai trò',
-                  prefixIcon: const Icon(Icons.work, color: Colors.blue),
+                  labelText: 'Số điện thoại',
+                  prefixIcon: const Icon(Icons.phone, color: Color(0xFF7DD1C6)),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -131,14 +131,14 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('Hủy'),
+                    child: const Text('Hủy', style: TextStyle(color: Color(0xFF1C7D71))),
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton.icon(
-                    icon: const Icon(Icons.save),
+                    icon: const Icon(Icons.save, color: Colors.white),
                     label: const Text('Lưu'),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
+                      backgroundColor: const Color(0xFF7DD1C6),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -146,16 +146,16 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                     onPressed: () async {
                       final username = usernameController.text.trim();
                       final email = emailController.text.trim();
-                      final role = roleController.text.trim();
+                      final phone = phoneController.text.trim();
 
-                      if (username.isEmpty || email.isEmpty || role.isEmpty) return;
+                      if (username.isEmpty || email.isEmpty || phone.isEmpty) return;
 
                       Navigator.pop(context);
 
                       final Map<String, dynamic> userData = {
                         'username': username,
                         'email': email,
-                        'role': role,
+                        'phone': phone,
                         'photoURL': '',
                       };
 
@@ -184,7 +184,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       final search = filter.toLowerCase();
       return (u['username'] ?? '').toLowerCase().contains(search) ||
           (u['email'] ?? '').toLowerCase().contains(search) ||
-          (u['role'] ?? '').toLowerCase().contains(search);
+          (u['phone'] ?? '').toLowerCase().contains(search);
     }).toList();
 
     return AppBackground(
@@ -193,15 +193,20 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         appBar: AppBar(
           title: const Text(
             'Quản lý người dùng',
-            style: TextStyle(color: Colors.deepPurple, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Color(0xFF1C7D71), // xanh ngọc đậm
+              fontWeight: FontWeight.bold,
+            ),
           ),
+          backgroundColor: Colors.white,
+          iconTheme: const IconThemeData(color: Color(0xFF1C7D71)),
           actions: [
             IconButton(icon: const Icon(Icons.refresh), onPressed: _loadUsers),
             IconButton(icon: const Icon(Icons.add), onPressed: () => _showUserDialog()),
           ],
         ),
         body: isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: CircularProgressIndicator(color: Color(0xFF7DD1C6)))
             : Column(
           children: [
             Padding(
@@ -210,7 +215,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 controller: searchController,
                 onChanged: (v) => setState(() => filter = v),
                 decoration: const InputDecoration(
-                  prefixIcon: Icon(Icons.search, color: Colors.deepPurple),
+                  prefixIcon: Icon(Icons.search, color: Color(0xFF7DD1C6)),
                   hintText: 'Tìm kiếm người dùng...',
                   filled: true,
                   fillColor: Colors.white,
@@ -235,8 +240,8 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () => _showUserDialog(),
-          backgroundColor: Colors.deepPurple,
-          child: const Icon(Icons.add),
+          backgroundColor: const Color(0xFF7DD1C6),
+          child: const Icon(Icons.add, color: Colors.white),
         ),
       ),
     );

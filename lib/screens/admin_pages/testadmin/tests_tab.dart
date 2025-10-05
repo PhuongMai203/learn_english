@@ -147,26 +147,29 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
                   child: ExpansionTile(
                     tilePadding:
                     const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    childrenPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
+                    childrenPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     leading: CircleAvatar(
-                      backgroundColor: Colors.indigo.shade100,
-                      child: Icon(Icons.assignment,
-                          color: Colors.indigo.shade600),
+                      backgroundColor: const Color(0xFFB2E8E1),
+                      child: const Icon(Icons.assignment,
+                          color: Color(0xFF289F92)),
                     ),
-                    title: Text(
-                      test.title,
+                    title: const Text(
+                      "Bài kiểm tra",
                       style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.indigo.shade700),
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1C7D71), // Xanh ngọc đậm
+                      ),
                     ),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(test.description,
-                            style: const TextStyle(
-                                fontSize: 13, color: Colors.black54)),
+                        Text(
+                          test.description,
+                          style: const TextStyle(
+                              fontSize: 13, color: Colors.black54),
+                        ),
                         const SizedBox(height: 4),
                         Row(
                           children: [
@@ -175,7 +178,7 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
                                   horizontal: 8, vertical: 2),
                               decoration: BoxDecoration(
                                 color: test.isActive
-                                    ? Colors.green.shade100
+                                    ? const Color(0xFFCFF6F1)
                                     : Colors.red.shade100,
                                 borderRadius: BorderRadius.circular(10),
                               ),
@@ -185,7 +188,7 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
                                   fontSize: 12,
                                   fontWeight: FontWeight.w500,
                                   color: test.isActive
-                                      ? Colors.green.shade800
+                                      ? const Color(0xFF1C7D71)
                                       : Colors.red.shade800,
                                 ),
                               ),
@@ -211,7 +214,7 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
                         alignment: Alignment.centerLeft,
                         child: TextButton.icon(
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.indigo.shade600,
+                            foregroundColor: const Color(0xFF1C7D71),
                           ),
                           onPressed: () => _addQuestion(test),
                           icon: const Icon(Icons.add),
@@ -223,7 +226,8 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
                         children: [
                           IconButton(
                             onPressed: () => _editTest(test),
-                            icon: const Icon(Icons.edit, color: Colors.indigo),
+                            icon: const Icon(Icons.edit,
+                                color: Color(0xFF1C7D71)),
                           ),
                           IconButton(
                             onPressed: () => _deleteTest(test),
@@ -242,7 +246,7 @@ class _AdminTestsScreenState extends State<AdminTestsScreen> {
           onPressed: _addTest,
           icon: const Icon(Icons.add),
           label: const Text("Thêm bài kiểm tra"),
-          backgroundColor: Colors.indigo.shade600,
+          backgroundColor: const Color(0xFF7DD1C6), // Xanh ngọc pastel
         ),
       ),
     );

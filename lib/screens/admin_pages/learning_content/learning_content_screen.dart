@@ -24,7 +24,7 @@ class LearningContentScreen extends StatelessWidget {
           title: const Text(
             'Nội dung học',
             style: TextStyle(
-              color: Colors.deepPurple,
+              color: Color(0xFF3F978B),
               fontWeight: FontWeight.bold,
               fontSize: 20,
             ),

@@ -10,12 +10,19 @@ class LearningTabBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF4A90E2), // Màu xanh dương
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF7DD1C6), // Xanh ngọc pastel
+            Color(0xFFA8E6CF), // Xanh ngọc nhạt hơn
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 5,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -25,8 +32,8 @@ class LearningTabBar extends StatelessWidget implements PreferredSizeWidget {
           insets: EdgeInsets.symmetric(horizontal: 20.0),
         ),
         indicatorWeight: 3,
-        labelColor: Colors.white,
-        unselectedLabelColor: Color(0xFFBBDEFB), // Xanh nhạt
+        labelColor: Colors.black,
+        unselectedLabelColor: Color(0xFFE0F7F4), // Xanh ngọc nhạt
         labelStyle: TextStyle(
           fontWeight: FontWeight.bold,
           fontSize: 14,

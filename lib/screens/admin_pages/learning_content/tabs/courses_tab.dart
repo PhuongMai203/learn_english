@@ -38,8 +38,8 @@ class CoursesTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.deepPurple,
-        foregroundColor: Colors.white,
+        backgroundColor: Color(0xFF7DD1C6),
+        foregroundColor: Colors.black,
         icon: const Icon(Icons.add),
         label: const Text('Thêm khóa học'),
         onPressed: () => Navigator.push(
@@ -149,7 +149,8 @@ class CoursesTab extends StatelessWidget {
                                       ),
                                     ],
                                   ),
-                                  child: const Icon(Icons.more_vert, color: Colors.deepPurple),
+                                  child: const Icon(Icons.more_vert, color: Color(
+                                      0xFF1F7067)),
                                 ),
                                 itemBuilder: (context) => [
                                   PopupMenuItem(
@@ -205,7 +206,7 @@ class CoursesTab extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.deepPurple,
+                                  color: Color(0xFF187A70),
                                 ),
                               ),
                               const SizedBox(height: 8),
@@ -219,7 +220,7 @@ class CoursesTab extends StatelessWidget {
                                     course['level'] ?? 'Không rõ cấp độ',
                                     style: TextStyle(
                                       fontSize: 14,
-                                      color: Colors.deepPurple[700],
+                                      color: Color(0xFF187A70),
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),

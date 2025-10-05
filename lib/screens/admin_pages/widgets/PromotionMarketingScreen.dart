@@ -29,7 +29,7 @@ class _PromotionMarketingScreenState extends State<PromotionMarketingScreen> {
               controller: titleController,
               decoration: const InputDecoration(
                 labelText: "Tiêu đề",
-                prefixIcon: Icon(Icons.title, color: Colors.blue),
+                prefixIcon: Icon(Icons.title, color: Color(0xFF1C7D71)), // xanh ngọc đậm
               ),
             ),
             const SizedBox(height: 12),
@@ -37,7 +37,7 @@ class _PromotionMarketingScreenState extends State<PromotionMarketingScreen> {
               controller: descController,
               decoration: const InputDecoration(
                 labelText: "Mô tả",
-                prefixIcon: Icon(Icons.description, color: Colors.green),
+                prefixIcon: Icon(Icons.description, color: Color(0xFF4FB9A5)),
               ),
               maxLines: 3,
             ),
@@ -46,11 +46,11 @@ class _PromotionMarketingScreenState extends State<PromotionMarketingScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Hủy"),
+            child: const Text("Hủy", style: TextStyle(color: Color(0xFF1C7D71))),
           ),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF5D8BF4),
+              backgroundColor: const Color(0xFF7DD1C6),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () async {
@@ -63,10 +63,11 @@ class _PromotionMarketingScreenState extends State<PromotionMarketingScreen> {
                 Navigator.pop(context);
               }
             },
-            icon: const Icon(Icons.save),
-            label: Text("Lưu", style: TextStyle(
-              color: Colors.white
-            ),),
+            icon: const Icon(Icons.save, color: Colors.white),
+            label: const Text(
+              "Lưu",
+              style: TextStyle(color: Colors.white),
+            ),
           ),
         ],
       ),
@@ -91,10 +92,13 @@ class _PromotionMarketingScreenState extends State<PromotionMarketingScreen> {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Hủy")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Hủy", style: TextStyle(color: Color(0xFF1C7D71))),
+          ),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
+              backgroundColor: const Color(0xFF4FB9A5),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () async {
@@ -104,8 +108,8 @@ class _PromotionMarketingScreenState extends State<PromotionMarketingScreen> {
               });
               Navigator.pop(context);
             },
-            icon: const Icon(Icons.update),
-            label: const Text("Cập nhật"),
+            icon: const Icon(Icons.update, color: Colors.white),
+            label: const Text("Cập nhật", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -128,10 +132,11 @@ class _PromotionMarketingScreenState extends State<PromotionMarketingScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text("Quản lý Khuyến mãi & Tiếp thị", style: TextStyle(
-            color: Colors.white
-          ),),
-          backgroundColor: const Color(0xFF5D8BF4),
+          title: const Text(
+            "Quản lý Khuyến mãi & Tiếp thị",
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: const Color(0xFF7DD1C6),
           elevation: 0,
           iconTheme: const IconThemeData(color: Colors.white),
         ),
@@ -139,7 +144,7 @@ class _PromotionMarketingScreenState extends State<PromotionMarketingScreen> {
           stream: _firestore.collection("promotions").orderBy("createdAt", descending: true).snapshots(),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
-              return const Center(child: Text("❌ Lỗi khi tải dữ liệu"));
+              return const Center(child: Text(" Lỗi khi tải dữ liệu"));
             }
             if (!snapshot.hasData) {
               return const Center(child: CircularProgressIndicator());
@@ -147,7 +152,7 @@ class _PromotionMarketingScreenState extends State<PromotionMarketingScreen> {
 
             final promotions = snapshot.data!.docs;
             if (promotions.isEmpty) {
-              return const Center(child: Text("📭 Chưa có khuyến mãi nào"));
+              return const Center(child: Text("Chưa có khuyến mãi nào"));
             }
 
             return ListView.builder(
@@ -167,8 +172,8 @@ class _PromotionMarketingScreenState extends State<PromotionMarketingScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   child: ListTile(
                     leading: CircleAvatar(
-                      backgroundColor: Colors.blue.shade100,
-                      child: const Icon(Icons.campaign, color: Colors.blue),
+                      backgroundColor: const Color(0xFFE3F9F6), // xanh ngọc nhạt
+                      child: const Icon(Icons.campaign, color: Color(0xFF1C7D71)),
                     ),
                     title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
                     subtitle: Column(
@@ -204,11 +209,12 @@ class _PromotionMarketingScreenState extends State<PromotionMarketingScreen> {
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: _addPromotion,
-          backgroundColor: const Color(0xFF5D8BF4),
-          icon: const Icon(Icons.add),
-          label: Text("Thêm khuyến mãi", style: TextStyle(
-            color: Colors.white
-          ),),
+          backgroundColor: const Color(0xFF7DD1C6),
+          icon: const Icon(Icons.add, color: Colors.white),
+          label: const Text(
+            "Thêm khuyến mãi",
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
     );

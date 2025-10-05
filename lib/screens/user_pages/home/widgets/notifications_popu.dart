@@ -9,6 +9,7 @@ class CourseNotificationsPopup {
 
   CourseNotificationsPopup({required this.context, required this.iconKey});
 
+  // 🔹 Lấy danh sách thông báo từ Firestore
   Future<List<String>> _fetchNotifications() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return [];
@@ -34,20 +35,19 @@ class CourseNotificationsPopup {
     return messages;
   }
 
+  // 🔹 Hiển thị hoặc ẩn popup thông báo
   void toggle() async {
-    // Nếu popup đang hiển thị thì remove và kết thúc
     if (_entry != null) {
       _entry!.remove();
       _entry = null;
       return;
     }
 
-    // Fetch thông báo
     final notifications = await _fetchNotifications();
 
     if (notifications.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Bạn không có thông báo mới 🎉")),
+        const SnackBar(content: Text("Bạn không có thông báo mới")),
       );
       return;
     }
@@ -57,41 +57,110 @@ class CourseNotificationsPopup {
     final iconPosition = renderBox.localToGlobal(Offset.zero);
 
     _entry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: iconPosition.dy + renderBox.size.height + 8, // ngay dưới icon
-        right: 16, // canh bên phải
-        width: MediaQuery.of(context).size.width * 2 / 3, // 2/3 màn hình
-        child: Material(
-          elevation: 6,
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.deepPurple[50],
-          child: Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: notifications
-                  .take(3)
-                  .map(
-                    (msg) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4.0),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.notifications, color: Colors.deepPurple),
-                      const SizedBox(width: 8),
-                      Expanded(
-                          child: Text(msg,
-                              style: const TextStyle(color: Colors.deepPurple))),
-                    ],
-                  ),
-                ),
-              )
-                  .toList(),
+      builder: (context) => Stack(
+        children: [
+          // Nhấn ra ngoài để tắt popup
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () {
+                _entry?.remove();
+                _entry = null;
+              },
+              behavior: HitTestBehavior.translucent,
             ),
           ),
-        ),
+          Positioned(
+            top: iconPosition.dy + renderBox.size.height + 8, // ngay dưới icon
+            right: 16, // canh bên phải
+            width: MediaQuery.of(context).size.width * 2 / 3, // 2/3 màn hình
+            child: Material(
+              elevation: 6,
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.deepPurple[50],
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxHeight: 300),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: notifications
+                          .map(
+                            (msg) => Padding(
+                          padding:
+                          const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.notifications,
+                                  color: Colors.deepPurple),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  msg,
+                                  style: const TextStyle(
+                                      color: Colors.deepPurple),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                          .toList(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
 
     overlay.insert(_entry!);
+  }
+
+  // 🔹 Widget hiển thị icon có badge
+  Widget buildNotificationIcon() {
+    return Stack(
+      children: [
+        IconButton(
+          key: iconKey,
+          icon: const Icon(Icons.notifications, size: 28, color: Colors.deepPurple),
+          onPressed: () => toggle(),
+        ),
+        // Badge hiển thị số thông báo
+        Positioned(
+          right: 6,
+          top: 6,
+          child: FutureBuilder<List<String>>(
+            future: _fetchNotifications(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return const SizedBox();
+              }
+              final count = snapshot.data!.length;
+              return Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.red,
+                  shape: BoxShape.circle,
+                ),
+                constraints:
+                const BoxConstraints(minWidth: 20, minHeight: 20),
+                child: Text(
+                  count.toString(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -39,7 +39,8 @@ class AdminSystemSettingsScreen extends StatelessWidget {
             ),
           ),
           centerTitle: true,
-          backgroundColor: const Color(0xFF5D8BF4),
+          // 🌿 Đổi từ xanh dương sang xanh ngọc pastel đậm
+          backgroundColor: const Color(0xFF7DD1C6),
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -113,7 +114,7 @@ class AdminSystemSettingsScreen extends StatelessWidget {
         style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: Colors.indigo,
+          color: Color(0xFF1C7D71), // 🌿 xanh ngọc đậm hơn một chút
         ),
       ),
     );
@@ -133,15 +134,19 @@ class AdminSystemSettingsScreen extends StatelessWidget {
         contentPadding:
         const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         leading: CircleAvatar(
-          backgroundColor: Colors.indigo.shade100,
-          child: Icon(icon, color: Colors.indigo),
+          backgroundColor: const Color(0xFFE3F9F6), // 🌿 xanh ngọc pastel nhạt
+          child: const Icon(
+            Icons.settings,
+            color: Color(0xFF1C7D71), // xanh ngọc đậm
+          ),
         ),
         title: Text(
           title,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         subtitle: subtitle != null ? Text(subtitle) : null,
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        trailing: const Icon(Icons.arrow_forward_ios,
+            size: 16, color: Color(0xFF7DD1C6)),
         onTap: onTap,
       ),
     );
