@@ -37,9 +37,7 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
   bool _isUploading = false;
 
   final picker = ImagePicker();
-
   VideoPlayerController? _videoController;
-  bool _isVideoPlaying = false; // Thêm trạng thái phát video
 
   bool get isYoutubeLink =>
       _mediaUrl?.contains("youtube.com") == true ||
@@ -52,8 +50,7 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
     _descriptionController =
         TextEditingController(text: widget.lessonData['description']);
     _youtubeLinkController = TextEditingController(
-      text: widget.lessonData['mediaUrl']?.toString().contains("youtube.com") ==
-          true
+      text: widget.lessonData['mediaUrl']?.toString().contains("youtube.com") == true
           ? widget.lessonData['mediaUrl']
           : '',
     );
@@ -88,7 +85,6 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
       });
   }
 
-  // Hàm mới: Khởi tạo video từ file cục bộ
   Future<void> _initializeVideoFromFile(File file) async {
     _videoController?.dispose();
     _videoController = VideoPlayerController.file(file)
@@ -108,11 +104,9 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
         _selectedMedia = file;
       });
 
-      // Nếu là video, khởi tạo controller để xem trước
       if (isVideo) {
         await _initializeVideoFromFile(file);
       } else {
-        // Nếu là ảnh, hủy video controller nếu có
         _videoController?.dispose();
         setState(() {
           _videoController = null;
@@ -172,12 +166,12 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('✅ Bài học đã được cập nhật!')),
+          const SnackBar(content: Text('Bài học đã được cập nhật!')),
         );
         Navigator.pop(context);
       }
     } catch (e) {
-      debugPrint('❌ Lỗi khi cập nhật bài học: $e');
+      debugPrint('Lỗi khi cập nhật bài học: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Lỗi: $e')),
@@ -204,7 +198,6 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
     }
   }
 
-  // Hàm mới: Xây dựng giao diện xem video
   Widget _buildVideoPlayer() {
     if (_videoController == null || !_videoController!.value.isInitialized) {
       return const CircularProgressIndicator();
@@ -243,7 +236,7 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
           _videoController!,
           allowScrubbing: true,
           colors: const VideoProgressColors(
-            playedColor: Colors.orange,
+            playedColor: Colors.teal,
           ),
         ),
       ],
@@ -261,7 +254,7 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
       case 'mp4':
       case 'mov':
       case 'avi':
-        return _buildVideoPlayer(); // Sử dụng video player mới
+        return _buildVideoPlayer();
       case 'jpg':
       case 'jpeg':
       case 'png':
@@ -272,7 +265,7 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
           height: 180,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) =>
-          const Text('❌ Không tải được ảnh'),
+          const Text('Không tải được ảnh'),
         );
       default:
         return const Text("📁 File không hỗ trợ xem trước");
@@ -287,31 +280,50 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
         const SizedBox(height: 8),
         TextFormField(
           controller: _youtubeLinkController,
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             labelText: 'Link YouTube (nếu có)',
-            prefixIcon: Icon(Icons.link),
-            border: OutlineInputBorder(),
+            prefixIcon: const Icon(Icons.link, color: Colors.teal),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.teal.shade200),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: Colors.red),
+            ),
           ),
         ),
         const SizedBox(height: 12),
         Row(
           children: [
             ElevatedButton.icon(
-              icon: const Icon(Icons.image),
+              icon: Icon(Icons.image, color: Colors.white,),
               onPressed: () => _pickMedia(ImageSource.gallery, isVideo: false),
-              label: const Text("Tải ảnh từ máy"),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal[400]),
+              label: Text("Tải ảnh từ máy",
+                style: TextStyle(
+                  color: Colors.white
+                ),
+              ),
             ),
             const SizedBox(width: 8),
             ElevatedButton.icon(
-              icon: const Icon(Icons.video_file),
+              icon: Icon(Icons.video_file, color: Colors.white,),
               onPressed: () => _pickMedia(ImageSource.gallery, isVideo: true),
-              label: const Text("Tải video từ máy"),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.teal[400]),
+              label: Text("Tải video từ máy",
+                style: TextStyle(
+                    color: Colors.white
+                ),),
             ),
           ],
         ),
         const SizedBox(height: 8),
 
-        // Hiển thị media được chọn từ máy
         if (_selectedMedia != null)
           _selectedMedia!.path.endsWith('.mp4')
               ? _buildVideoPlayer()
@@ -323,7 +335,6 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
 
         const SizedBox(height: 12),
 
-        // Hiển thị media từ Firebase nếu không chọn file mới
         if (_selectedMedia == null && _mediaUrl != null && _mediaUrl!.isNotEmpty)
           isYoutubeLink
               ? Text("Đang dùng link YouTube: $_mediaUrl")
@@ -345,8 +356,7 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text('Chỉnh sửa bài học',
-              style: TextStyle(color: Colors.orange.shade200)),
+          title: Text('Chỉnh sửa bài học', style: TextStyle(color: Colors.teal[700])),
           backgroundColor: Colors.white,
           centerTitle: true,
         ),
@@ -358,10 +368,21 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
               children: [
                 TextFormField(
                   controller: _titleController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Tiêu đề',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.title),
+                    prefixIcon: const Icon(Icons.title, color: Colors.teal),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.teal.shade200),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
                   ),
                   validator: (value) =>
                   value == null || value.isEmpty ? 'Nhập tiêu đề' : null,
@@ -369,10 +390,21 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _descriptionController,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Mô tả',
-                    border: OutlineInputBorder(),
-                    prefixIcon: Icon(Icons.description),
+                    prefixIcon: const Icon(Icons.description, color: Colors.teal),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.teal.shade200),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: BorderSide(color: Colors.teal.shade600, width: 2),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      borderSide: const BorderSide(color: Colors.red),
+                    ),
                   ),
                   maxLines: 3,
                   validator: (value) =>
@@ -389,7 +421,7 @@ class _EditLessonScreenState extends State<EditLessonScreen> {
                     style: const TextStyle(color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xD8FFB833),
+                    backgroundColor: Colors.teal[700],
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                 ),

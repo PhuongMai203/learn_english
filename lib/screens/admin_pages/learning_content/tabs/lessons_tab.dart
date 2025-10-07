@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../../components/app_background.dart';
+import 'widgets/AddLessonScreen.dart';
 import 'widgets/edit_lesson_screen.dart';
 
 class LessonListScreen extends StatefulWidget {
@@ -49,6 +50,35 @@ class _LessonListScreenState extends State<LessonListScreen> {
     }
   }
 
+  void _showDeleteConfirmation({required String courseId, required String lessonId}) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Xác nhận xóa', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text('Bạn có chắc chắn muốn xóa bài học này không?'),
+        actions: [
+          TextButton(
+            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          ElevatedButton(
+            child: const Text('Xóa'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            onPressed: () async {
+              Navigator.of(context).pop();
+              await deleteLesson(courseId, lessonId);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppBackground(
@@ -95,7 +125,6 @@ class _LessonListScreenState extends State<LessonListScreen> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-
                   child: ExpansionTile(
                     tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     title: Text(
@@ -103,7 +132,7 @@ class _LessonListScreenState extends State<LessonListScreen> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
-                        color: Colors.black
+                        color: Colors.black,
                       ),
                     ),
                     leading: Container(
@@ -115,13 +144,12 @@ class _LessonListScreenState extends State<LessonListScreen> {
                       child: Text(
                         '${lessons.length}',
                         style: const TextStyle(
-                          fontWeight: FontWeight.w900, // Đậm nhất
-                          fontSize: 18, // Tăng cỡ chữ
-                          color: Color(0xFF0D47A1), // Màu xanh đậm hơn
+                          fontWeight: FontWeight.w900,
+                          fontSize: 18,
+                          color: Color(0xFF0D47A1),
                         ),
                       ),
                     ),
-
                     children: [
                       if (lessons.isEmpty)
                         Padding(
@@ -200,35 +228,22 @@ class _LessonListScreenState extends State<LessonListScreen> {
             );
           },
         ),
-      ),
-    );
-  }
-
-  void _showDeleteConfirmation({required String courseId, required String lessonId}) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Xác nhận xóa', style: TextStyle(fontWeight: FontWeight.bold)),
-        content: const Text('Bạn có chắc chắn muốn xóa bài học này không?'),
-        actions: [
-          TextButton(
-            child: const Text('Hủy', style: TextStyle(color: Colors.grey)),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
-          ElevatedButton(
-            child: const Text('Xóa'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => const AddLessonScreen(),
               ),
-            ),
-            onPressed: () async {
-              Navigator.of(context).pop();
-              await deleteLesson(courseId, lessonId);
-            },
-          ),
-        ],
+            ).then((_) {
+              // reload lại danh sách sau khi thêm xong
+              setState(() {});
+            });
+          },
+          backgroundColor: Colors.teal[400],
+          child: const Icon(Icons.add, color: Colors.white),
+          tooltip: 'Thêm bài học mới',
+        ),
       ),
     );
   }

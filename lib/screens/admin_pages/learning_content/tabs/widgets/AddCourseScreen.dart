@@ -21,7 +21,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   File? _pickedImage;
   bool _isLoading = false;
 
-  final List<String> _levels = ['Cơ bản', 'Trung cấp', 'Nâng cao'];
+  final List<String> _levels = ['Cơ bản', 'Nâng cao'];
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -42,12 +42,10 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       try {
         String? imageUrl;
 
-        // Upload ảnh nếu có
         if (_pickedImage != null) {
           imageUrl = await _uploadImage(_pickedImage!);
         }
 
-        // Lưu dữ liệu lên Firestore
         await FirebaseFirestore.instance.collection('courses').add({
           'title': _titleController.text,
           'description': _descriptionController.text,
@@ -56,7 +54,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           'createdAt': FieldValue.serverTimestamp(),
         });
 
-        // Hiển thị thông báo thành công
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: const Text('Khóa học đã được thêm thành công!'),
@@ -68,11 +65,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           ),
         );
 
-        // Quay về màn hình trước sau 2 giây
         await Future.delayed(const Duration(seconds: 2));
         if (mounted) Navigator.pop(context);
       } catch (e) {
-        // Hiển thị lỗi nếu có
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Lỗi: ${e.toString()}'),
@@ -95,16 +90,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
   Future<String> _uploadImage(File image) async {
     try {
-      // Tạo tên file duy nhất
       String fileName = 'course_images/${DateTime.now().millisecondsSinceEpoch}.jpg';
-
-      // Tham chiếu đến Firebase Storage
       Reference storageRef = FirebaseStorage.instance.ref().child(fileName);
-
-      // Upload file
       await storageRef.putFile(image);
-
-      // Lấy URL download
       return await storageRef.getDownloadURL();
     } catch (e) {
       throw Exception('Lỗi upload ảnh: $e');
@@ -117,16 +105,17 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Thêm khóa học mới',
-              style: TextStyle(fontWeight: FontWeight.w600, color: Colors.deepPurple)),
+          title: const Text(
+            'Thêm khóa học mới',
+            style: TextStyle(fontWeight: FontWeight.w600, color: Colors.teal),
+          ),
           centerTitle: true,
           backgroundColor: Colors.white,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.deepPurple),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.teal),
             onPressed: () => Navigator.pop(context),
           ),
-          iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: Stack(
           children: [
@@ -149,11 +138,11 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                             height: 180,
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              color: Colors.blue.shade50,
+                              color: Colors.teal.shade50,
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.blue.shade100.withOpacity(0.5),
+                                  color: Colors.teal.shade100.withOpacity(0.5),
                                   blurRadius: 8,
                                   offset: const Offset(0, 4),
                                 ),
@@ -165,16 +154,13 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                                   ? Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Icon(
-                                    Icons.add_photo_alternate_rounded,
-                                    size: 50,
-                                    color: Colors.blue[400],
-                                  ),
+                                  Icon(Icons.add_photo_alternate_rounded,
+                                      size: 50, color: Colors.teal[400]),
                                   const SizedBox(height: 12),
                                   Text(
                                     'Thêm hình ảnh khóa học',
                                     style: TextStyle(
-                                      color: Colors.blue[700],
+                                      color: Colors.teal[700],
                                       fontWeight: FontWeight.w500,
                                     ),
                                   ),
@@ -214,8 +200,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                           ),
                           filled: true,
                           fillColor: Colors.white,
-                          prefixIcon: Icon(Icons.description_rounded,
-                              color: Colors.blue[700]),
+                          prefixIcon:
+                          Icon(Icons.description_rounded, color: Colors.teal[700]),
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 18),
                         ),
@@ -233,37 +219,47 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.blue.shade100.withOpacity(0.3),
+                              color: Colors.teal.shade100.withOpacity(0.3),
                               blurRadius: 8,
                               offset: const Offset(0, 4),
                             ),
                           ],
                         ),
-                        child: DropdownButtonFormField<String>(
-                          value: _selectedLevel,
-                          isExpanded: true,
-                          icon: Icon(Icons.arrow_drop_down_rounded,
-                              color: Colors.blue[700]),
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            prefixIcon: Icon(Icons.school_rounded,
-                                color: Colors.blue[700]),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButtonFormField<String>(
+                            value: _selectedLevel,
+                            isExpanded: true,
+                            dropdownColor: Colors.white,
+                            icon: Icon(Icons.arrow_drop_down_rounded,
+                                color: Colors.teal[700]),
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                            ),
+                            items: _levels
+                                .map(
+                                  (level) => DropdownMenuItem(
+                                value: level,
+                                child: Text(
+                                  level,
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                            )
+                                .toList(),
+                            onChanged: (value) {
+                              setState(() {
+                                _selectedLevel = value;
+                              });
+                            },
+                            validator: (value) =>
+                            value == null ? 'Vui lòng chọn cấp độ' : null,
+                            hint: Text('Chọn cấp độ phù hợp',
+                                style: TextStyle(color: Colors.black)),
+                            style: const TextStyle(fontSize: 16),
                           ),
-                          items: _levels
-                              .map((level) => DropdownMenuItem(
-                            value: level,
-                            child: Text(level),
-                          ))
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              _selectedLevel = value;
-                            });
-                          },
-                          validator: (value) =>
-                          value == null ? 'Vui lòng chọn cấp độ' : null,
-                          hint: Text('Chọn cấp độ phù hợp', style: TextStyle(color: Colors.blue[700])),
-                          style: const TextStyle(fontSize: 16),
                         ),
                       ),
 
@@ -275,15 +271,14 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                         child: ElevatedButton(
                           onPressed: _isLoading ? null : _submitForm,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: _isLoading
-                                ? Colors.grey
-                                : Colors.blue[800],
+                            backgroundColor:
+                            _isLoading ? Colors.grey : Colors.teal[700],
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
                             elevation: 5,
-                            shadowColor: Colors.blue[700]!.withOpacity(0.5),
+                            shadowColor: Colors.teal[700]!.withOpacity(0.5),
                           ),
                           child: _isLoading
                               ? const CircularProgressIndicator(color: Colors.white)
@@ -305,7 +300,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
               ),
             ),
 
-            // Loading overlay
             if (_isLoading)
               Container(
                 color: Colors.black.withOpacity(0.5),
@@ -329,7 +323,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         style: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w600,
-          color: Colors.blue[800],
+          color: Colors.teal[700],
         ),
       ),
     );
@@ -348,24 +342,19 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         filled: true,
         fillColor: Colors.white,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-        prefixIcon: Icon(icon, color: Colors.blue[700]),
-
-        // Viền khi chưa focus
+        prefixIcon: Icon(icon, color: Colors.teal[700]),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide.none,
         ),
-
-        // Viền khi focus (click vào)
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(
-            color: Colors.blue.shade800, // Xanh dương đậm
+            color: Colors.teal.shade700,
             width: 2.0,
           ),
         ),
       ),
-
       validator: validator,
     );
   }
